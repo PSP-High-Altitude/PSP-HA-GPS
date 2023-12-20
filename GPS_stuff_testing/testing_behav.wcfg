@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="testing_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="testing" />
+            <top_module name="vcomponents" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="999.490000 us"></ZoomStartTime>
+      <ZoomEndTime time="1,001.302001 us"></ZoomEndTime>
+      <Cursor1Time time="1,001.000000 us"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="153"></NameColumnWidth>
+      <ValueColumnWidth column_width="156"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="26" />
+   <wvobject fp_name="/testing/file_bit" type="logic">
+      <obj_property name="ElementShortName">file_bit</obj_property>
+      <obj_property name="ObjectShortName">file_bit</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/file" type="array">
+      <obj_property name="ElementShortName">file[31:0]</obj_property>
+      <obj_property name="ObjectShortName">file[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/file_buf_idx" type="array">
+      <obj_property name="ElementShortName">file_buf_idx[2:0]</obj_property>
+      <obj_property name="ObjectShortName">file_buf_idx[2:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/file_buf" type="array">
+      <obj_property name="ElementShortName">file_buf[7:0]</obj_property>
+      <obj_property name="ObjectShortName">file_buf[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/clk_out_0" type="logic">
+      <obj_property name="ElementShortName">clk_out_0</obj_property>
+      <obj_property name="ObjectShortName">clk_out_0</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/Re" type="array">
+      <obj_property name="ElementShortName">Re[31:0]</obj_property>
+      <obj_property name="ObjectShortName">Re[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/file_rec_buf" type="array">
+      <obj_property name="ElementShortName">file_rec_buf[31:0]</obj_property>
+      <obj_property name="ObjectShortName">file_rec_buf[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/Im" type="array">
+      <obj_property name="ElementShortName">Im[31:0]</obj_property>
+      <obj_property name="ObjectShortName">Im[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/in" type="logic">
+      <obj_property name="ElementShortName">in</obj_property>
+      <obj_property name="ObjectShortName">in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/outRe" type="array">
+      <obj_property name="ElementShortName">outRe[31:0]</obj_property>
+      <obj_property name="ObjectShortName">outRe[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/outIm" type="array">
+      <obj_property name="ElementShortName">outIm[31:0]</obj_property>
+      <obj_property name="ObjectShortName">outIm[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/counter" type="array">
+      <obj_property name="ElementShortName">counter[9:0]</obj_property>
+      <obj_property name="ObjectShortName">counter[9:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/last_data" type="logic">
+      <obj_property name="ElementShortName">last_data</obj_property>
+      <obj_property name="ObjectShortName">last_data</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/inFFT" type="array">
+      <obj_property name="ElementShortName">inFFT[63:0]</obj_property>
+      <obj_property name="ObjectShortName">inFFT[63:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/outFFT" type="array">
+      <obj_property name="ElementShortName">outFFT[63:0]</obj_property>
+      <obj_property name="ObjectShortName">outFFT[63:0]</obj_property>
+      <obj_property name="WaveformStyle">STYLE_DIGITAL</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/out_ready" type="logic">
+      <obj_property name="ElementShortName">out_ready</obj_property>
+      <obj_property name="ObjectShortName">out_ready</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/in_ready" type="logic">
+      <obj_property name="ElementShortName">in_ready</obj_property>
+      <obj_property name="ObjectShortName">in_ready</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/fft_core/m_axis_data_tlast" type="logic">
+      <obj_property name="ElementShortName">m_axis_data_tlast</obj_property>
+      <obj_property name="ObjectShortName">m_axis_data_tlast</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/last_out" type="logic">
+      <obj_property name="ElementShortName">last_out</obj_property>
+      <obj_property name="ObjectShortName">last_out</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_idx" type="array">
+      <obj_property name="ElementShortName">fft_idx[9:0]</obj_property>
+      <obj_property name="ObjectShortName">fft_idx[9:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/test_flip" type="logic">
+      <obj_property name="ElementShortName">test_flip</obj_property>
+      <obj_property name="ObjectShortName">test_flip</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/test_ovflow" type="logic">
+      <obj_property name="ElementShortName">test_ovflow</obj_property>
+      <obj_property name="ObjectShortName">test_ovflow</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/fft_core/s_axis_config_tready" type="logic">
+      <obj_property name="ElementShortName">s_axis_config_tready</obj_property>
+      <obj_property name="ObjectShortName">s_axis_config_tready</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/fft_0/fft_core/s_axis_data_tvalid" type="logic">
+      <obj_property name="ElementShortName">s_axis_data_tvalid</obj_property>
+      <obj_property name="ObjectShortName">s_axis_data_tvalid</obj_property>
+   </wvobject>
+   <wvobject fp_name="/testing/file_rec_buf" type="array">
+      <obj_property name="ElementShortName">file_rec_buf[31:0]</obj_property>
+      <obj_property name="ObjectShortName">file_rec_buf[31:0]</obj_property>
+   </wvobject>
+</wave_config>

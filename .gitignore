@@ -1,0 +1,4 @@
+fpga_c_model/build_command.bat
+*.exe
+*.bin
+GPS_stuff_testing/GPS_stuff_testing.sim
