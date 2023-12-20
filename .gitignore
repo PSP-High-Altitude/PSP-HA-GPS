@@ -1,4 +1,5 @@
 fpga_c_model/build_command.bat
 *.exe
 *.bin
+!gps.samples.1bit.I.fs5456.if4092.bin
 GPS_stuff_testing/GPS_stuff_testing.sim
