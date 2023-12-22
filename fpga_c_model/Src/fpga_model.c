@@ -4,10 +4,12 @@
 #include "tools.h"
 #include "gps.h"
 #include "channel.h"
+#include "solve.h"
+#include "math.h"
 
-const int sv[NUM_CHANNELS] = {30, 31, 29, 1};
-const double lo_dop[NUM_CHANNELS] = {-2162, -1900, -2200, 1400};
-const double ca_shift[NUM_CHANNELS] = {857.8, 534.4, 39.9, 198.2};
+const int sv[NUM_CHANNELS] = {30, 31, 29, 21};
+const double lo_dop[NUM_CHANNELS] = {-2162, -1900, -2200, 2000};
+const double ca_shift[NUM_CHANNELS] = {857.8, 534.4, 39.9, 962.4};
 
 uint8_t file_buf;
 uint8_t file_buf_idx = 0;
@@ -21,6 +23,8 @@ int main() {
     for(int i = 0; i < NUM_CHANNELS; i++) {
         init_channel(&channels[i], i, sv[i] - 1, lo_dop[i], ca_shift[i]);
     }
+
+    uint64_t clock = 0;
 
     while(time_limit--) {
         if(!file_buf_idx) {
@@ -39,6 +43,19 @@ int main() {
         for(int i = 0; i < NUM_CHANNELS; i++) {
             clock_channel(&channels[i], sample);
         }
+
+        if(clock % (lrint(fs)*6) == 0) {
+            double x, y, z, t_bias;
+            double lat, lon, alt;
+            channel_t *channels_in_soln[] = {&channels[0], &channels[1], &channels[2], &channels[3]};
+            if(solve(channels_in_soln, 4, &x, &y, &z, &t_bias)) {
+                printf("x: %g, y: %g, z: %g, t_bias: %g\n", x, y, z, t_bias);
+                to_coords(x, y, z, &lat, &lon, &alt);
+                printf("lat: %g, lon: %g, alt: %g\n", lat, lon, alt);
+            }
+        }
+
+        clock++;
     }
 
     if(file) {

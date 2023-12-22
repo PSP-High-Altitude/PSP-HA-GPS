@@ -91,6 +91,7 @@ void init_channel(channel_t *chan, int chan_num, int sv, double lo_dop, double c
     chan->nav_valid = 0;
     chan->nav_bit_count = 0;
     chan->last_z_count = 0;
+    memset(&chan->ephm, 0, sizeof(ephemeris_t));
 }
 
 void do_sample(channel_t *chan, uint8_t sample) {
@@ -247,9 +248,12 @@ void clock_channel(channel_t *chan, uint8_t sample) {
         if(chan->nav_bit_count >= 300) {
             if(process_message(chan)) {
                 printf("Channel %d: Preamble found at time: %d!\n", chan->chan_num, chan->total_ms);
-            }
-            memmove(chan->nav_buf, chan->nav_buf+1, 299);
-            chan->nav_bit_count--;
+                save_ephemeris_data(chan->nav_buf, &chan->ephm);
+                
+                memmove(chan->nav_buf, chan->nav_buf+300, chan->nav_bit_count-=300);
+            } else {
+                memmove(chan->nav_buf, chan->nav_buf+1, chan->nav_bit_count--);
+            }   
         }
 
         chan->ie = 0;

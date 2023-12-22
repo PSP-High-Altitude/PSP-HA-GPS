@@ -3,6 +3,7 @@
 
 #include "gps.h"
 #include "stdint.h"
+#include "ephemeris.h"
 
 #define NAV_BUFFER_SIZE 300
 
@@ -45,8 +46,12 @@ typedef struct {
     uint16_t nav_bit_count;
     uint8_t nav_valid;
     int32_t last_z_count;
+
+    ephemeris_t ephm;
 } channel_t;
 
+void clock_ca(ca_t *ca);
+uint8_t get_ca(ca_t *ca);
 void init_channel(channel_t *chan, int chan_num, int sv, double lo_dop, double ca_shift);
 void clock_channel(channel_t *chan, uint8_t sample);
 
