@@ -7,14 +7,15 @@
 #include "solve.h"
 #include "math.h"
 
-const int sv[NUM_CHANNELS] = {30, 31, 29, 21};
-const double lo_dop[NUM_CHANNELS] = {-2162, -1900, -2200, 2000};
-const double ca_shift[NUM_CHANNELS] = {857.8, 534.4, 39.9, 962.4};
+const int sv[NUM_CHANNELS] = {30, 31, 29, 1};
+const double lo_dop[NUM_CHANNELS] = {-2162, -1900, -2200, 1350};
+const double ca_shift[NUM_CHANNELS] = {857.8, 534.4, 39.9, 198.2};
 
 uint8_t file_buf;
 uint8_t file_buf_idx = 0;
 FILE *file;
 
+uint64_t clock = 0;
 uint64_t time_limit = fs*60;
 
 int main() {
@@ -23,8 +24,6 @@ int main() {
     for(int i = 0; i < NUM_CHANNELS; i++) {
         init_channel(&channels[i], i, sv[i] - 1, lo_dop[i], ca_shift[i]);
     }
-
-    uint64_t clock = 0;
 
     while(time_limit--) {
         if(!file_buf_idx) {
@@ -44,12 +43,19 @@ int main() {
             clock_channel(&channels[i], sample);
         }
 
-        if(clock % (lrint(fs)*6) == 0) {
+        if(clock % (lrint(fs)*1) == 0) {
             double x, y, z, t_bias;
             double lat, lon, alt;
             channel_t *channels_in_soln[] = {&channels[0], &channels[1], &channels[2], &channels[3]};
-            if(solve(channels_in_soln, 4, &x, &y, &z, &t_bias)) {
-                printf("x: %g, y: %g, z: %g, t_bias: %g\n", x, y, z, t_bias);
+            uint8_t ready = 1;
+            for(int i = 0; i < 4; i++) {
+                if(channels_in_soln[i]->wait_frames) {
+                    ready = 0;
+                    break;
+                }
+            }
+            if(ready && solve(channels_in_soln, 4, &x, &y, &z, &t_bias)) {
+                //printf("x: %g, y: %g, z: %g, t_bias: %g\n", x, y, z, t_bias);
                 to_coords(x, y, z, &lat, &lon, &alt);
                 printf("lat: %g, lon: %g, alt: %g\n", lat, lon, alt);
             }
@@ -62,23 +68,5 @@ int main() {
         fclose(file);
     }
 
-    // Plotting
-    /*
-    FILE *gnuplot_file = fopen("temp.dat", "w");
-
-    FILE *gnuplot = _popen("gnuplot -persist", "w");
-    
-    for (int i = 0; i < ip_save_idx; i++)
-    {
-        fprintf(gnuplot_file, "%g %g\n", (double) ip_save[i], (double) qp_save[i]);
-    }
-    fclose(gnuplot_file);
-    
-    fprintf(gnuplot, "set xrange [-2000:2000]\n");
-    fprintf(gnuplot, "set yrange [-2000:2000]\n");
-    fprintf(gnuplot, "plot 'temp.dat' with points\n");
-
-    _pclose(gnuplot);
-    */
     return 0;
 }

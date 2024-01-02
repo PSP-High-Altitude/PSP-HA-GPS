@@ -38,14 +38,14 @@ typedef struct {
     uint8_t ca_en;
 
     uint8_t tracked_this_epoch;
-    uint8_t first_bit;
-    uint8_t wait_epoch;
+    uint8_t wait_frames;
     uint8_t nav_ms;
     uint32_t total_ms;
     uint8_t nav_buf[NAV_BUFFER_SIZE+1];
     uint16_t nav_bit_count;
     uint8_t nav_valid;
     int32_t last_z_count;
+    uint8_t last_bit;
 
     ephemeris_t ephm;
 } channel_t;

@@ -1,4 +1,5 @@
 #include "ephemeris.h"
+#include "gps.h"
 #include "string.h"
 #include "stdio.h"
 #include "math.h"
@@ -95,15 +96,18 @@ void save_ephemeris_data(uint8_t *buf, ephemeris_t *ephm) {
 
 double time_from_epoch(double t, double t_epoch) {
     t -= t_epoch;
-    t = t < -302400 ? t + 604800 : t;
-    t = t > 302400 ? t - 604800 : t;
+    if(t > 302400) {
+        t -= 604800;
+    } else if(t < -302400) {
+        t += 604800;
+    }
     return t;
 }
 
 double eccentric_anomaly(ephemeris_t *ephm, double t_k) {
     double root_A = ephm->root_A * pow(2, -19);
-    double delta_n = ephm->delta_n * pow(2, -43);
-    double M_0 = ephm->M_0 * pow(2, -31);
+    double delta_n = ephm->delta_n * pow(2, -43) * PI;
+    double M_0 = ephm->M_0 * pow(2, -31) * PI;
     double e = ephm->e * pow(2, -33);
 
     double A = root_A * root_A;
@@ -127,17 +131,17 @@ double eccentric_anomaly(ephemeris_t *ephm, double t_k) {
 void get_satellite_ecef(ephemeris_t *ephm, double t, double *x, double *y, double *z) {
     double root_A = ephm->root_A * pow(2, -19);
     double e = ephm->e * pow(2, -33);
-    double omega = ephm->omega * pow(2, -31);
+    double omega = ephm->omega * pow(2, -31) * PI;
     double C_uc = ephm->C_uc * pow(2, -29);
     double C_us = ephm->C_us * pow(2, -29);
     double C_rc = ephm->C_rc * pow(2, -5);
     double C_rs = ephm->C_rs * pow(2, -5);
     double C_ic = ephm->C_ic * pow(2, -29);
     double C_is = ephm->C_is * pow(2, -29);
-    double i_0 = ephm->i_0 * pow(2, -31);
-    double IDOT = ephm->IDOT * pow(2, -43);
-    double Omega_0 = ephm->Omega_0 * pow(2, -31);
-    double omega_dot = ephm->omega_dot * pow(2, -43);
+    double i_0 = ephm->i_0 * pow(2, -31) * PI;
+    double IDOT = ephm->IDOT * pow(2, -43) * PI;
+    double Omega_0 = ephm->Omega_0 * pow(2, -31) * PI;
+    double omega_dot = ephm->omega_dot * pow(2, -43) * PI;
     double t_oe = ephm->t_oe * pow(2, 4);
 
     double A = root_A * root_A;

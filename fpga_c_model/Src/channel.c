@@ -2,9 +2,17 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 const uint8_t lo_sin[] = {0, 0, 1, 1};
 const uint8_t lo_cos[] = {0, 1, 1, 0};
+
+double clock_save[300][32];
+uint8_t nav_ms_save[300][32];
+int64_t ip_save[300][32];
+uint16_t save_idx[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+extern uint64_t clock;
 
 const int SVs[] = { // PRN, Navstar, taps
      1,  63,  2,  6,
@@ -84,13 +92,13 @@ void init_channel(channel_t *chan, int chan_num, int sv, double lo_dop, double c
 
     chan->ca_en = 0;
     chan->tracked_this_epoch = 0;
-    chan->first_bit = 2;
-    chan->wait_epoch = 4;
+    chan->wait_frames = 2;
     chan->nav_ms = 0;
     chan->total_ms = 0;
     chan->nav_valid = 0;
     chan->nav_bit_count = 0;
     chan->last_z_count = 0;
+    chan->last_bit = 2;
     memset(&chan->ephm, 0, sizeof(ephemeris_t));
 }
 
@@ -115,30 +123,33 @@ void do_sample(channel_t *chan, uint8_t sample) {
 }
 
 void process_ip_to_bit(channel_t *chan) {
-    if(chan->first_bit == 2)                                                    // First call
-    {
-        chan->first_bit = (chan->ip > 0) ? 1:0;
-        return;
-    } 
-    else if(chan->first_bit != 3 && ((chan->ip > 0) ? 1:0 != chan->first_bit))  // First edge
-    {
-        chan->nav_ms = 0;
-        chan->first_bit = 3;
-        return;
+    if(save_idx[chan->sv] < 300) clock_save[save_idx[chan->sv]][chan->sv] = clock / fs;
+    if(save_idx[chan->sv] < 300) ip_save[save_idx[chan->sv]][chan->sv] = chan->ip;
+    if(save_idx[chan->sv] < 300) nav_ms_save[save_idx[chan->sv]++][chan->sv] = chan->nav_ms;
+
+    if(chan->last_bit == 2) {                               // Initial state
+        chan->last_bit = (chan->ip > 0) ? 1:0;
     }
-    else if(chan->nav_ms == 0)                                                  // Sample bit
-    {
+    else if(chan->nav_ms == 19) {                           // 20ms rollover
         uint8_t bit = (chan->ip > 0) ? 1:0;
         if(chan->nav_bit_count < 300) {
             chan->nav_buf[chan->nav_bit_count++] = bit;
         }
+        chan->last_bit = (chan->ip > 0) ? 1:0;
+        chan->nav_ms = 0;
     }
-    chan->nav_ms = (chan->nav_ms + 1) % 20;
+    else if(chan->last_bit != ((chan->ip > 0) ? 1:0)) {     // Unexpected transition
+        chan->last_bit = (chan->ip > 0) ? 1:0;
+        chan->nav_ms = 0;
+    }
+    else {                                                  // Middle of bit
+        chan->nav_ms++;
+    }
     chan->total_ms++;
 }
 
 uint8_t check_parity(uint8_t *bits, uint8_t *p, uint8_t D29, uint8_t D30) {
-    // D29 and D30 are the bits from the previous word (ugh)
+    // D29 and D30 are the bits from the previous word
     uint8_t *d = bits - 1;
     for(uint8_t i = 1; i < 25; i++) d[i] ^= D30; // Flip to correct polarity as we go
     p[0] = D29 ^ d[1] ^ d[2] ^ d[3] ^ d[5] ^ d[6] ^ d[10] ^ d[11] ^ d[12] ^ d[13] ^ d[14] ^ d[17] ^ d[18] ^ d[20] ^ d[23];
@@ -163,6 +174,7 @@ uint8_t process_message(channel_t *chan) {
     // Check 10 word parities
     for(uint8_t i = 0; i < 10; i++) {
         if(!check_parity(chan->nav_buf+i*30, p, p[4], p[5])) {
+            chan->wait_frames = 2;
             return 0;
         }
     }
@@ -170,6 +182,7 @@ uint8_t process_message(channel_t *chan) {
     // Verify HOW subframe ID
     uint8_t subframe_id = (chan->nav_buf[29+20] << 2) | (chan->nav_buf[29+21] << 1) | chan->nav_buf[29+22];
     if(subframe_id < 1 || subframe_id > 5) {
+        chan->wait_frames = 2;
         return 0;
     }
     
@@ -184,6 +197,30 @@ uint8_t process_message(channel_t *chan) {
         chan->nav_valid = 0;
     }
     chan->last_z_count = this_z_count;
+    if(chan->wait_frames) chan->wait_frames--;
+
+    /*
+    // Plotting
+    FILE *gnuplot_file = fopen("temp.dat", "w");
+
+    FILE *gnuplot = _popen("gnuplot -persist", "w");
+    
+    for (int i = 0; i < save_idx[chan->sv]; i++)
+    {
+        fprintf(gnuplot_file, "%g %g %g\n", clock_save[i][chan->sv], (double) ip_save[i][chan->sv], (double) nav_ms_save[i][chan->sv]);
+    }
+    fclose(gnuplot_file);
+    
+    fprintf(gnuplot, "set title 'SV: %d'\n", chan->sv+1);
+    fprintf(gnuplot, "set yrange [-2000:2000]\n");
+    fprintf(gnuplot, "set y2range [0:20]\n");
+    fprintf(gnuplot, "set ytics\n");
+    fprintf(gnuplot, "set y2tics\n");
+    fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'I' axes x1y1 with lines, \\\n"
+                     "'temp.dat' using 1:3 title 'ms' axes x1y2 with points\n");
+
+    _pclose(gnuplot);
+    */
 
     //printf("Subframe ID: %d\n", subframe_id);
     return 1;
@@ -239,17 +276,11 @@ void clock_channel(channel_t *chan, uint8_t sample) {
         //printf("carrier doppler from carrier lock: %llu\n", lo_freq_integrator);
 
         // Process nav bits
-        if(chan->wait_epoch) {
-            chan->wait_epoch--;
-        } else {
-            process_ip_to_bit(chan);
-        }
-        
+        process_ip_to_bit(chan);
+
         if(chan->nav_bit_count >= 300) {
             if(process_message(chan)) {
-                printf("Channel %d: Preamble found at time: %d!\n", chan->chan_num, chan->total_ms);
                 save_ephemeris_data(chan->nav_buf, &chan->ephm);
-                
                 memmove(chan->nav_buf, chan->nav_buf+300, chan->nav_bit_count-=300);
             } else {
                 memmove(chan->nav_buf, chan->nav_buf+1, chan->nav_bit_count--);

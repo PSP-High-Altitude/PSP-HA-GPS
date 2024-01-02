@@ -47,8 +47,6 @@ uint8_t solve(channel_t **chan, int num_chans, double *x, double *y, double *z, 
         t_tx[i] = get_tx_time(chan[i]);
         t_tx[i] -= get_clock_correction(&chan[i]->ephm, t_tx[i]);
         get_satellite_ecef(&chan[i]->ephm, t_tx[i], x_sat+i, y_sat+i, z_sat+i);
-        //printf("%d, x_sat: %g, y_sat: %g, z_sat: %g\n", i, x_sat[i], y_sat[i], z_sat[i]);
-        //printf("A: %f\n", pow(chan[i]->ephm.root_A * pow(2, -19), 2));
         t_pc += t_tx[i];
         weights[i] = 1;
     }
@@ -147,7 +145,7 @@ uint8_t solve(channel_t **chan, int num_chans, double *x, double *y, double *z, 
 
         double error = sqrt(dx*dx + dy*dy + dz*dz);
 
-        if (error < 1) break;
+        if (error < 1.0) break;
         *x += dx;
         *y += dy;
         *z += dz;
@@ -166,7 +164,7 @@ void to_coords(double x, double y, double z, double *lat, double *lon, double *a
     *lat = atan(z / (p * (1.0 - e2)));
     *alt = 0.0;
 
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < 100; i++) {
         double N = a / sqrt(1.0 - e2*sin(*lat)*sin(*lat));
         double alt_new = p / cos(*lat) - N;
         *lat = atan(z / (p * (1.0 - e2*N/(N+alt_new))));
