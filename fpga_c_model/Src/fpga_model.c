@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "tools.h"
 #include "gps.h"
@@ -17,6 +18,12 @@ FILE *file;
 
 uint64_t clock = 0;
 uint64_t time_limit = fs*60;
+
+#define AVG_COUNT 50
+double avg_lat[AVG_COUNT];
+double avg_lon[AVG_COUNT];
+double avg_alt[AVG_COUNT];
+int avg_count = 0;
 
 int main() {
     file = fopen("gps.samples.1bit.I.fs5456.if4092.bin", "rb");
@@ -43,7 +50,7 @@ int main() {
             clock_channel(&channels[i], sample);
         }
 
-        if(clock % (lrint(fs)*1) == 0) {
+        if(clock % (lrint(fs)/10) == 0) {
             double x, y, z, t_bias;
             double lat, lon, alt;
             channel_t *channels_in_soln[] = {&channels[0], &channels[1], &channels[2], &channels[3]};
@@ -57,7 +64,32 @@ int main() {
             if(ready && solve(channels_in_soln, 4, &x, &y, &z, &t_bias)) {
                 //printf("x: %g, y: %g, z: %g, t_bias: %g\n", x, y, z, t_bias);
                 to_coords(x, y, z, &lat, &lon, &alt);
-                printf("lat: %g, lon: %g, alt: %g\n", lat, lon, alt);
+                if(avg_count < AVG_COUNT) {
+                    avg_lat[avg_count] = lat;
+                    avg_lon[avg_count] = lon;
+                    avg_alt[avg_count] = alt;
+                    avg_count++;
+                } else {
+                    // Add new point
+                    memmove(avg_lat+1, avg_lat, (AVG_COUNT-1)*sizeof(double));
+                    avg_lat[0] = lat;
+                    avg_lon[0] = lon;
+                    avg_alt[0] = alt;
+
+                    // Calculate average
+                    lat = 0;
+                    lon = 0;
+                    alt = 0;
+                    for(int i = 0; i < AVG_COUNT; i++) {
+                        lat += avg_lat[i];
+                        lon += avg_lon[i];
+                        alt += avg_alt[i];
+                    }
+                    lat /= AVG_COUNT;
+                    lon /= AVG_COUNT;
+                    alt /= AVG_COUNT;
+                    printf("%.8f,%.8f,%.8f\n", lat, lon, alt);
+                }
             }
         }
 

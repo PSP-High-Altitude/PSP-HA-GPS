@@ -18,12 +18,15 @@ double get_tx_time(channel_t *chan) {
         clock_ca(&ca);
     }
 
-    return
-        chan->last_z_count * 6.0 +
+    double t = chan->last_z_count * 6.0 +
         chan->nav_bit_count / 50.0 +
         chan->nav_ms / 1000.0 +
-        chips / 1023000.0 +
+        chips / 1023000.0 -
         chan->ca_phase * pow(2, -32) / 1023000.0;
+
+    //if(chan->sv+1 == 29) printf("%d,%u,%u,%u,%lu,%.10f\n", chan->last_z_count, chan->nav_bit_count, chan->nav_ms, chips, chan->ca_phase, t);
+
+    return t;
 }
 
 uint8_t solve(channel_t **chan, int num_chans, double *x, double *y, double *z, double *t_bias) {
@@ -51,7 +54,7 @@ uint8_t solve(channel_t **chan, int num_chans, double *x, double *y, double *z, 
         weights[i] = 1;
     }
 
-    // Starting value for transit time
+    // Starting value for receiver time
     t_pc = t_pc / num_chans + 75e-3;
 
     // Taylor series solution

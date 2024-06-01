@@ -73,8 +73,8 @@ void init_channel(channel_t *chan, int chan_num, int sv, double lo_dop, double c
     const double ca_dop = lo_dop/1575.42e6*1023000.0;
     chan->phase_offset = (uint32_t)(fs/500 - (ca_shift*fs/1023000.0)) % ((int64_t)fs/1000);
 
-    chan->ca_rate = (uint32_t)((1023000.0 + ca_dop)/fs*4294967296.0);
-    chan->lo_rate = (uint32_t)((fc + lo_dop)/fs*4294967296.0);
+    chan->ca_rate = (uint32_t)((1023000.0 + ca_dop)/fs*pow(2, 32));
+    chan->lo_rate = (uint32_t)((fc + lo_dop)/fs*pow(2, 32));
 
     chan->ca_phase = 0;
     chan->lo_phase = 0;
@@ -146,6 +146,8 @@ void process_ip_to_bit(channel_t *chan) {
         chan->nav_ms++;
     }
     chan->total_ms++;
+
+    //printf("SV: %d\n\tBit: %d\n\tms: %d\n", chan->sv+1, chan->last_bit, chan->nav_ms);
 }
 
 uint8_t check_parity(uint8_t *bits, uint8_t *p, uint8_t D29, uint8_t D30) {
