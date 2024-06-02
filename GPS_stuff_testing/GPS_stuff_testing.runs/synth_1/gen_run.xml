@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="synth_1" LaunchPart="xc7s50ftgb196-2" LaunchTime="1693705479" LaunchIncrCheckpoint="$PSRCDIR/utils_1/imports/synth_1/cacode.dcp">
-  <File Type="PA-TCL" Name="main.tcl"/>
-  <File Type="REPORTS-TCL" Name="main_reports.tcl"/>
-  <File Type="RDS-RDS" Name="main.vds"/>
-  <File Type="RDS-UTIL" Name="main_utilization_synth.rpt"/>
-  <File Type="RDS-UTIL-PB" Name="main_utilization_synth.pb"/>
-  <File Type="RDS-DCP" Name="main.dcp"/>
+<GenRun Id="synth_1" LaunchPart="xc7s50ftgb196-2" LaunchTime="1716948035" LaunchIncrCheckpoint="$PSRCDIR/utils_1/imports/synth_1/cacode.dcp">
+  <File Type="PA-TCL" Name="channel.tcl"/>
+  <File Type="REPORTS-TCL" Name="channel_reports.tcl"/>
+  <File Type="RDS-RDS" Name="channel.vds"/>
+  <File Type="RDS-UTIL" Name="channel_utilization_synth.rpt"/>
+  <File Type="RDS-UTIL-PB" Name="channel_utilization_synth.pb"/>
+  <File Type="RDS-DCP" Name="channel.dcp"/>
   <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1" RelGenDir="$PGENDIR/sources_1">
     <Filter Type="Srcs"/>
     <File Path="$PSRCDIR/sim_1/new/cacode.v">
@@ -22,7 +22,7 @@
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
-    <File Path="$PSRCDIR/sim_1/new/main.sv">
+    <File Path="$PSRCDIR/sources_1/new/channel.sv">
       <FileInfo>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="implementation"/>
@@ -31,7 +31,7 @@
     </File>
     <Config>
       <Option Name="DesignMode" Val="RTL"/>
-      <Option Name="TopModule" Val="main"/>
+      <Option Name="TopModule" Val="channel"/>
     </Config>
   </FileSet>
   <FileSet Name="constrs_in" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1" RelGenDir="$PGENDIR/constrs_1">
@@ -65,5 +65,4 @@
     <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2023"/>
     <Step Id="synth_design"/>
   </Strategy>
-  <BlockFileSet Type="BlockSrcs" Name="clk_wiz_0"/>
 </GenRun>

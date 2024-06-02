@@ -3,138 +3,106 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="testbench_behav.wdb" id="1">
+      <db_ref path="main_behav.wdb" id="1">
          <top_modules>
             <top_module name="glbl" />
-            <top_module name="testbench" />
+            <top_module name="main" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
-      <ZoomEndTime time="26.100000001 ms"></ZoomEndTime>
-      <Cursor1Time time="10.682364730 ms"></Cursor1Time>
+      <ZoomEndTime time="776.000000001 ms"></ZoomEndTime>
+      <Cursor1Time time="100.001000000 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="59"></NameColumnWidth>
-      <ValueColumnWidth column_width="58"></ValueColumnWidth>
+      <NameColumnWidth column_width="177"></NameColumnWidth>
+      <ValueColumnWidth column_width="78"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="22" />
-   <wvobject fp_name="/testbench/clk" type="logic">
+   <WVObjectSize size="10" />
+   <wvobject fp_name="/main/clk" type="logic">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
    </wvobject>
-   <wvobject fp_name="/testbench/dut/clk_pll" type="logic">
-      <obj_property name="ElementShortName">clk_pll</obj_property>
-      <obj_property name="ObjectShortName">clk_pll</obj_property>
+   <wvobject fp_name="/main/ip" type="array">
+      <obj_property name="ElementShortName">ip[1:0][14:1]</obj_property>
+      <obj_property name="ObjectShortName">ip[1:0][14:1]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/main/ip[1]" type="array">
+         <obj_property name="ElementShortName">[1][14:1]</obj_property>
+         <obj_property name="ObjectShortName">[1][14:1]</obj_property>
+         <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+         <obj_property name="CellHeight">100</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+         <obj_property name="AnalogYRangeType">ANALOG_YRANGETYPE_FIXED</obj_property>
+         <obj_property name="AnalogYRangeMin">-2000.000000</obj_property>
+         <obj_property name="AnalogYRRangeMax">2000.000000</obj_property>
+         <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
+         <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
+         <obj_property name="AnalogHorizLine">0.000000</obj_property>
+      </wvobject>
+      <wvobject fp_name="/main/ip[0]" type="array">
+         <obj_property name="ElementShortName">[0][14:1]</obj_property>
+         <obj_property name="ObjectShortName">[0][14:1]</obj_property>
+         <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+         <obj_property name="CellHeight">100</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+         <obj_property name="AnalogYRangeType">ANALOG_YRANGETYPE_FIXED</obj_property>
+         <obj_property name="AnalogYRangeMin">-2000.000000</obj_property>
+         <obj_property name="AnalogYRRangeMax">2000.000000</obj_property>
+         <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
+         <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
+         <obj_property name="AnalogHorizLine">0.000000</obj_property>
+      </wvobject>
    </wvobject>
-   <wvobject fp_name="/testbench/dut/clk_sample" type="logic">
-      <obj_property name="ElementShortName">clk_sample</obj_property>
-      <obj_property name="ObjectShortName">clk_sample</obj_property>
+   <wvobject fp_name="/main/qp" type="array">
+      <obj_property name="ElementShortName">qp[1:0][14:1]</obj_property>
+      <obj_property name="ObjectShortName">qp[1:0][14:1]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject fp_name="/main/qp[1]" type="array">
+         <obj_property name="ElementShortName">[1][14:1]</obj_property>
+         <obj_property name="ObjectShortName">[1][14:1]</obj_property>
+         <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+         <obj_property name="CellHeight">100</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject fp_name="/main/qp[0]" type="array">
+         <obj_property name="ElementShortName">[0][14:1]</obj_property>
+         <obj_property name="ObjectShortName">[0][14:1]</obj_property>
+         <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+         <obj_property name="CellHeight">100</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      </wvobject>
    </wvobject>
-   <wvobject fp_name="/testbench/dut/ca_full" type="logic">
-      <obj_property name="ElementShortName">ca_full</obj_property>
-      <obj_property name="ObjectShortName">ca_full</obj_property>
+   <wvobject fp_name="/main/new_ca_freq_integrator" type="array">
+      <obj_property name="ElementShortName">new_ca_freq_integrator[63:0]</obj_property>
+      <obj_property name="ObjectShortName">new_ca_freq_integrator[63:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testbench/dut/ca_half" type="logic">
-      <obj_property name="ElementShortName">ca_half</obj_property>
-      <obj_property name="ObjectShortName">ca_half</obj_property>
+   <wvobject fp_name="/main/epoch" type="array">
+      <obj_property name="ElementShortName">epoch[1:0]</obj_property>
+      <obj_property name="ObjectShortName">epoch[1:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
-   <wvobject fp_name="/testbench/dut/lo_full" type="logic">
-      <obj_property name="ElementShortName">lo_full</obj_property>
-      <obj_property name="ObjectShortName">lo_full</obj_property>
+   <wvobject fp_name="/main/ch0/ca_en_sync" type="array">
+      <obj_property name="ElementShortName">ca_en_sync[1:0]</obj_property>
+      <obj_property name="ObjectShortName">ca_en_sync[1:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
-   <wvobject fp_name="/testbench/dut/lo_half" type="logic">
-      <obj_property name="ElementShortName">lo_half</obj_property>
-      <obj_property name="ObjectShortName">lo_half</obj_property>
+   <wvobject fp_name="/main/ch1/ca_en_sync" type="array">
+      <obj_property name="ElementShortName">ca_en_sync[1:0]</obj_property>
+      <obj_property name="ObjectShortName">ca_en_sync[1:0]</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
-   <wvobject fp_name="/testbench/dut/epoch" type="logic">
+   <wvobject fp_name="/main/ch0/epoch" type="logic">
       <obj_property name="ElementShortName">epoch</obj_property>
       <obj_property name="ObjectShortName">epoch</obj_property>
    </wvobject>
-   <wvobject fp_name="/testbench/dut/ca_en" type="logic">
-      <obj_property name="ElementShortName">ca_en</obj_property>
-      <obj_property name="ObjectShortName">ca_en</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/dut/code_phase_err" type="array">
-      <obj_property name="ElementShortName">code_phase_err[63:0]</obj_property>
-      <obj_property name="ObjectShortName">code_phase_err[63:0]</obj_property>
-      <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
-      <obj_property name="CellHeight">100</obj_property>
-      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-      <obj_property name="AnalogYRangeType">ANALOG_YRANGETYPE_FIXED</obj_property>
-      <obj_property name="AnalogYRangeMin">-1000000.000000</obj_property>
-      <obj_property name="AnalogYRRangeMax">1000000.000000</obj_property>
-      <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
-      <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
-      <obj_property name="AnalogHorizLine">0.000000</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/dut/carrier_phase_err" type="array">
-      <obj_property name="ElementShortName">carrier_phase_err[63:0]</obj_property>
-      <obj_property name="ObjectShortName">carrier_phase_err[63:0]</obj_property>
-      <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
-      <obj_property name="CellHeight">100</obj_property>
-      <obj_property name="AnalogYRangeType">ANALOG_YRANGETYPE_FIXED</obj_property>
-      <obj_property name="AnalogYRangeMin">-680851</obj_property>
-      <obj_property name="AnalogYRRangeMax">1.31915e+06</obj_property>
-      <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
-      <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
-      <obj_property name="AnalogHorizLine">0.000000</obj_property>
-      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/dut/ca_rate" type="array">
+   <wvobject fp_name="/main/ch0/ca_rate" type="array">
       <obj_property name="ElementShortName">ca_rate[31:0]</obj_property>
       <obj_property name="ObjectShortName">ca_rate[31:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/testbench/dut/lo_rate" type="array">
+   <wvobject fp_name="/main/ch0/lo_rate" type="array">
       <obj_property name="ElementShortName">lo_rate[31:0]</obj_property>
       <obj_property name="ObjectShortName">lo_rate[31:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/dut/ie" type="array">
-      <obj_property name="ElementShortName">ie[14:1]</obj_property>
-      <obj_property name="ObjectShortName">ie[14:1]</obj_property>
-      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/dut/qe" type="array">
-      <obj_property name="ElementShortName">qe[14:1]</obj_property>
-      <obj_property name="ObjectShortName">qe[14:1]</obj_property>
-      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/dut/ip" type="array">
-      <obj_property name="ElementShortName">ip[14:1]</obj_property>
-      <obj_property name="ObjectShortName">ip[14:1]</obj_property>
-      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/dut/qp" type="array">
-      <obj_property name="ElementShortName">qp[14:1]</obj_property>
-      <obj_property name="ObjectShortName">qp[14:1]</obj_property>
-      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/dut/il" type="array">
-      <obj_property name="ElementShortName">il[14:1]</obj_property>
-      <obj_property name="ObjectShortName">il[14:1]</obj_property>
-      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/dut/ql" type="array">
-      <obj_property name="ElementShortName">ql[14:1]</obj_property>
-      <obj_property name="ObjectShortName">ql[14:1]</obj_property>
-      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/dut/power_early" type="array">
-      <obj_property name="ElementShortName">power_early[63:0]</obj_property>
-      <obj_property name="ObjectShortName">power_early[63:0]</obj_property>
-      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/dut/power_late" type="array">
-      <obj_property name="ElementShortName">power_late[63:0]</obj_property>
-      <obj_property name="ObjectShortName">power_late[63:0]</obj_property>
-      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-   </wvobject>
-   <wvobject fp_name="/testbench/dut/ca_freq_integrator" type="array">
-      <obj_property name="ElementShortName">ca_freq_integrator[63:0]</obj_property>
-      <obj_property name="ObjectShortName">ca_freq_integrator[63:0]</obj_property>
-      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-      <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
-      <obj_property name="CellHeight">100</obj_property>
    </wvobject>
 </wave_config>

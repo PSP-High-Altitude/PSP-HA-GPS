@@ -1,14 +1,14 @@
 #-----------------------------------------------------------
-# Vivado v2023.1.1 (64-bit)
-# SW Build 3900603 on Fri Jun 16 19:31:24 MDT 2023
-# IP Build 3900379 on Sat Jun 17 05:28:05 MDT 2023
-# SharedData Build 3899622 on Fri Jun 16 03:34:24 MDT 2023
-# Start of session at: Sat Sep  2 21:44:43 2023
-# Process ID: 34056
-# Current directory: C:/Users/griff/GPS_stuff_testing/GPS_stuff_testing.runs/synth_1
-# Command line: vivado.exe -log main.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source main.tcl
-# Log file: C:/Users/griff/GPS_stuff_testing/GPS_stuff_testing.runs/synth_1/main.vds
-# Journal file: C:/Users/griff/GPS_stuff_testing/GPS_stuff_testing.runs/synth_1\vivado.jou
+# Vivado v2023.2 (64-bit)
+# SW Build 4029153 on Fri Oct 13 20:14:34 MDT 2023
+# IP Build 4028589 on Sat Oct 14 00:45:43 MDT 2023
+# SharedData Build 4025554 on Tue Oct 10 17:18:54 MDT 2023
+# Start of session at: Tue May 28 22:00:39 2024
+# Process ID: 48396
+# Current directory: D:/github_repos/PSP-GPS/GPS_stuff_testing/GPS_stuff_testing.runs/synth_1
+# Command line: vivado.exe -log channel.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source channel.tcl
+# Log file: D:/github_repos/PSP-GPS/GPS_stuff_testing/GPS_stuff_testing.runs/synth_1/channel.vds
+# Journal file: D:/github_repos/PSP-GPS/GPS_stuff_testing/GPS_stuff_testing.runs/synth_1\vivado.jou
 # Running On: GriffinDesk, OS: Windows, CPU Frequency: 3400 MHz, CPU Physical cores: 16, Host memory: 34281 MB
 #-----------------------------------------------------------
-source main.tcl -notrace
+source channel.tcl -notrace

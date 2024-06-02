@@ -12,9 +12,9 @@ echo "Please update the PATH and LD_LIBRARY_PATH variables below, before executi
 exit
 
 if [ -z "$PATH" ]; then
-  PATH=E:/Programs/Xilinx/Vivado/2023.1/ids_lite/ISE/bin/nt64;E:/Programs/Xilinx/Vivado/2023.1/ids_lite/ISE/lib/nt64:E:/Programs/Xilinx/Vivado/2023.1/bin
+  PATH=E:/Programs/Xilinx/Vivado/2023.2/ids_lite/ISE/bin/nt64;E:/Programs/Xilinx/Vivado/2023.2/ids_lite/ISE/lib/nt64:E:/Programs/Xilinx/Vivado/2023.2/bin
 else
-  PATH=E:/Programs/Xilinx/Vivado/2023.1/ids_lite/ISE/bin/nt64;E:/Programs/Xilinx/Vivado/2023.1/ids_lite/ISE/lib/nt64:E:/Programs/Xilinx/Vivado/2023.1/bin:$PATH
+  PATH=E:/Programs/Xilinx/Vivado/2023.2/ids_lite/ISE/bin/nt64;E:/Programs/Xilinx/Vivado/2023.2/ids_lite/ISE/lib/nt64:E:/Programs/Xilinx/Vivado/2023.2/bin:$PATH
 fi
 export PATH
 
@@ -25,7 +25,7 @@ else
 fi
 export LD_LIBRARY_PATH
 
-HD_PWD='C:/Users/griff/GPS_stuff_testing/GPS_stuff_testing.runs/synth_1'
+HD_PWD='D:/github_repos/PSP-GPS/GPS_stuff_testing/GPS_stuff_testing.runs/synth_1'
 cd "$HD_PWD"
 
 HD_LOG=runme.log
@@ -41,4 +41,4 @@ EAStep()
      fi
 }
 
-EAStep vivado -log main.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source main.tcl
+EAStep vivado -log channel.vds -m64 -product Vivado -mode batch -messageDb vivado.pb -notrace -source channel.tcl
