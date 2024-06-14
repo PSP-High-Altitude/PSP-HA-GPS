@@ -24,7 +24,7 @@ module testbench(
         output reg sample
     );
 
-    specparam PERIOD = 500000000 / 10000;
+    specparam PERIOD = 500000000 / 69984;
     
     initial begin
         clk = 0;
@@ -40,7 +40,8 @@ module testbench(
     integer file;
     
     initial begin
-        file = $fopen("C:/Users/griff/OneDrive/Documents/GNSS_SDR_Matlab/testing/gps.samples.1bit.I.fs10000.if2716.bin", "rb");
+        file = $fopen("D:/github_repos/PSP-GPS/gnss-20170427-L1.1bit.I.bin", "rb");
+        //file = $fopen("D:/github_repos/PSP-GPS/fpga_c_model/gps.samples.1bit.I.fs5456.if4092.bin", "rb");
     end
     
     always @ (posedge clk) begin

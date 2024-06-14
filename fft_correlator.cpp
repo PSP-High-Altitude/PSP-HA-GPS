@@ -199,10 +199,10 @@ int main(int argc, char *argv[])
     /****************************
      * Detals of the input file
      ****************************/
-    const int fc = 4092000; // or 1364000
-    const int fs = 5456000;
-    const char *in = "gps.samples.1bit.I.fs5456.if4092.bin";
-    const int ms = 20; // Length of data to process (milliseconds)
+    const int fc = 9334875; // or 1364000
+    const int fs = 69984000;
+    const char *in = "gnss-20170427-L1.1bit.I.bin";
+    const int ms = 10; // Length of data to process (milliseconds)
     const int Start = 0;
 
     /**************************************
@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
         /************************************************
          * Test at different doppler shifts (+/- 5kHz)
          ************************************************/
-        for (int dop = -5000 * Len / fs; dop <= 5000 * Len / fs; dop++)
+        for (int dop = -5000.0 * Len / fs; dop <= 5000.0 * Len / fs; dop++)
         {
             double max_pwr = 0, tot_pwr = 0;
             int max_pwr_i;

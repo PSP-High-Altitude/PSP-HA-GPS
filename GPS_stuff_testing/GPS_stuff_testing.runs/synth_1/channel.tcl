@@ -86,7 +86,11 @@ set_property ip_output_repo d:/github_repos/PSP-GPS/GPS_stuff_testing/GPS_stuff_
 set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
-read_verilog -library xil_defaultlib -sv D:/github_repos/PSP-GPS/GPS_stuff_testing/GPS_stuff_testing.srcs/sources_1/new/channel.sv
+read_verilog -library xil_defaultlib -sv {
+  D:/github_repos/PSP-GPS/GPS_stuff_testing/GPS_stuff_testing.srcs/sources_1/new/channel.sv
+  D:/github_repos/PSP-GPS/GPS_stuff_testing/GPS_stuff_testing.srcs/sources_1/new/main.sv
+  D:/github_repos/PSP-GPS/GPS_stuff_testing/GPS_stuff_testing.srcs/sources_1/new/loop_tracker.sv
+}
 read_verilog -library xil_defaultlib {
   D:/github_repos/PSP-GPS/GPS_stuff_testing/GPS_stuff_testing.srcs/sim_1/new/cacode.v
   D:/github_repos/PSP-GPS/GPS_stuff_testing/GPS_stuff_testing.srcs/sources_1/new/nco.v

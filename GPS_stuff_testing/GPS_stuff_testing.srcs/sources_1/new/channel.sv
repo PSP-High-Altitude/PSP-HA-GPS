@@ -17,7 +17,6 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
 module channel
     #(
         parameter SAMPLE_FREQ = 16800000.0,
@@ -41,8 +40,8 @@ module channel
     wire lo_half;
     reg ca_en = 0;
     
-    reg [31:0] ca_rate = int'(real'(1023000.0 + ca_dop)/SAMPLE_FREQ*(2.0**32));
-    reg [31:0] lo_rate = int'(real'(IF_FREQ + LO_DOP)/SAMPLE_FREQ*(2.0**32));
+    reg unsigned [31:0] ca_rate = longint'((1023000.0 + ca_dop)*(2.0**32))/longint'(SAMPLE_FREQ);//((1023000.0 + ca_dop)/SAMPLE_FREQ*(2.0**32));
+    reg unsigned [31:0] lo_rate = longint'((IF_FREQ + LO_DOP)*(2.0**32))/longint'(SAMPLE_FREQ);//((IF_FREQ + LO_DOP)/SAMPLE_FREQ*(2.0**32));
     
     reg signed [63:0] ca_freq_integrator = {ca_rate, 32'b0};
     reg signed [63:0] lo_freq_integrator = {lo_rate, 32'b0};

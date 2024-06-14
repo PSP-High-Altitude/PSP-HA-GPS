@@ -52,14 +52,22 @@ module loop_tracker(
     assign code_phase_err = power_early - power_late;
     
     // CA code tracking loop
-    assign new_ca_freq_integrator = ca_freq_integrator + (code_phase_err <<< 11);
-    assign new_ca_rate_long = ca_freq_integrator + (code_phase_err <<< 23);
+    // 10M sample rate: assign new_ca_freq_integrator = ca_freq_integrator + (code_phase_err <<< 11);
+    // 10M sample rate: assign new_ca_rate_long = ca_freq_integrator + (code_phase_err <<< 23);
+    // 5M sample rate: assign new_ca_freq_integrator = ca_freq_integrator + (code_phase_err <<< 11);
+    // 5M sample rate: assign new_ca_rate_long = ca_freq_integrator + (code_phase_err <<< 23);
+    assign new_ca_freq_integrator = ca_freq_integrator + (code_phase_err <<< 9);
+    assign new_ca_rate_long = ca_freq_integrator + (code_phase_err <<< 19);
     assign new_ca_rate = new_ca_rate_long[63:32];
     
     // Carrier tracking loop
     assign carrier_phase_err = ip*qp;
-    assign new_lo_freq_integrator = lo_freq_integrator + (carrier_phase_err <<< 20);
-    assign new_lo_rate_long = lo_freq_integrator + (carrier_phase_err <<< 27);
+    // 10M sample rate: assign new_lo_freq_integrator = lo_freq_integrator + (carrier_phase_err <<< 20);
+    // 10M sample rate: assign new_lo_rate_long = lo_freq_integrator + (carrier_phase_err <<< 27);
+    // 5M sample rate: assign new_lo_freq_integrator = lo_freq_integrator + (carrier_phase_err <<< 21);
+    // 5M sample rate: assign new_lo_rate_long = lo_freq_integrator + (carrier_phase_err <<< 28);
+    assign new_lo_freq_integrator = lo_freq_integrator + (carrier_phase_err <<< 17);
+    assign new_lo_rate_long = lo_freq_integrator + (carrier_phase_err <<< 23);
     assign new_lo_rate = new_lo_rate_long[63:32];
     
 endmodule

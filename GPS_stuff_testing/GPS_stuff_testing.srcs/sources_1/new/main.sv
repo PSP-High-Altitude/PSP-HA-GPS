@@ -32,11 +32,11 @@ module main(
     wire signed [14:1] qp [1:0];
     
     channel #(
-        .SAMPLE_FREQ(10000000.0), 
-        .IF_FREQ(2716000.0),
-        .SV(5'd28),
-        .LO_DOP(-2106.0),
-        .CA_SHIFT(456.2)
+        .SAMPLE_FREQ(69984000.0), 
+        .IF_FREQ(9334875.0),
+        .SV(5'd4),
+        .LO_DOP(1350.0),
+        .CA_SHIFT(969.4)
     ) ch0 (
         clk,
         sample,
@@ -45,11 +45,11 @@ module main(
     );
     
     channel #(
-        .SAMPLE_FREQ(10000000.0), 
-        .IF_FREQ(2716000.0),
-        .SV(5'd4),
-        .LO_DOP(-2600.0),
-        .CA_SHIFT(199.7)
+        .SAMPLE_FREQ(69984000.0), 
+        .IF_FREQ(9334875.0),
+        .SV(5'd20),
+        .LO_DOP(-2450.0),
+        .CA_SHIFT(817.4)
     ) ch1 (
         clk,
         sample,
@@ -123,6 +123,11 @@ module main(
         end
     end
     
+    int sav_num = 0;
+    int fd;
+    
+    initial fd = $fopen("iq_sav.csv", "w");
+    
     // Extract prompt I
     assign ip[0] = tracked_outs[0][56:43];
     assign ip[1] = tracked_outs[1][56:43];
@@ -130,5 +135,14 @@ module main(
     // Extract prompt Q
     assign qp[0] = tracked_outs[0][42:29];
     assign qp[1] = tracked_outs[1][42:29];
+    
+    always @(posedge epoch[1]) begin
+        if(sav_num < 100) begin
+            $fdisplay(fd, "%d,%d", ip[1], qp[1]);
+            sav_num = sav_num + 1;
+        end else begin
+            $fclose(fd);
+        end
+    end
     
 endmodule
