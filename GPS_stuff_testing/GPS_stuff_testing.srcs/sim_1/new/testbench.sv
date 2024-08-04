@@ -21,6 +21,7 @@
 
 module testbench(
         output reg clk,
+        output reg rst,
         output reg sample
     );
 
@@ -28,6 +29,9 @@ module testbench(
     
     initial begin
         clk = 0;
+        rst = 1;
+        #1000
+        rst <= 0;
     end
     
     always #PERIOD clk <= ~clk;

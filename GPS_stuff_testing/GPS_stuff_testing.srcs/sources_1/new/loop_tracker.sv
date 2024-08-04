@@ -21,7 +21,7 @@
 
 
 module loop_tracker(
-    input wire [84:1] tracked_ins,
+    input wire [108:1] tracked_ins,
     input wire signed [63:0] ca_freq_integrator,
     input wire signed [63:0] lo_freq_integrator,
     output wire signed [63:0] new_ca_freq_integrator,
@@ -30,12 +30,12 @@ module loop_tracker(
     output wire [31:0] new_lo_rate
     );
     
-    wire signed [14:1] ie;
-    wire signed [14:1] qe;
-    wire signed [14:1] ip; 
-    wire signed [14:1] qp;
-    wire signed [14:1] il; 
-    wire signed [14:1] ql;
+    wire signed [18:1] ie;
+    wire signed [18:1] qe;
+    wire signed [18:1] ip; 
+    wire signed [18:1] qp;
+    wire signed [18:1] il; 
+    wire signed [18:1] ql;
     
     assign {ie, qe, ip, qp, il, ql} = tracked_ins;
     
@@ -66,8 +66,8 @@ module loop_tracker(
     // 10M sample rate: assign new_lo_rate_long = lo_freq_integrator + (carrier_phase_err <<< 27);
     // 5M sample rate: assign new_lo_freq_integrator = lo_freq_integrator + (carrier_phase_err <<< 21);
     // 5M sample rate: assign new_lo_rate_long = lo_freq_integrator + (carrier_phase_err <<< 28);
-    assign new_lo_freq_integrator = lo_freq_integrator + (carrier_phase_err <<< 17);
-    assign new_lo_rate_long = lo_freq_integrator + (carrier_phase_err <<< 23);
+    assign new_lo_freq_integrator = lo_freq_integrator + (carrier_phase_err <<< 19);
+    assign new_lo_rate_long = lo_freq_integrator + (carrier_phase_err <<< 24);
     assign new_lo_rate = new_lo_rate_long[63:32];
     
 endmodule
