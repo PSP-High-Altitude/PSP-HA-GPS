@@ -49,7 +49,7 @@ module main(
         .IF_FREQ(9334875.0),
         .SV(5'd23),
         .LO_DOP(-246.0),
-        .CA_SHIFT(2837.75)
+        .CA_SHIFT(2837.5)
     ) ch1 (
         clk,
         rst,
@@ -74,7 +74,7 @@ module main(
     assign qp[1] = tracked_outs[1][54:37];
     
     always @(posedge epoch[1]) begin
-        if(sav_num < 99) begin
+        if(sav_num < 499) begin
             $fdisplay(fd, "%d,%d", ip[1], qp[1]);
             sav_num = sav_num + 1;
         end else begin

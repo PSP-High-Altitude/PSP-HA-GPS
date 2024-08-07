@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000000000 ms"></ZoomStartTime>
-      <ZoomEndTime time="1,138.500000001 ms"></ZoomEndTime>
-      <Cursor1Time time="400.001000000 ms"></Cursor1Time>
+      <ZoomStartTime time="95.834333333 ms"></ZoomStartTime>
+      <ZoomEndTime time="2,380.834333334 ms"></ZoomEndTime>
+      <Cursor1Time time="2,000.001000000 ms"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="176"></NameColumnWidth>
-      <ValueColumnWidth column_width="98"></ValueColumnWidth>
+      <ValueColumnWidth column_width="90"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="29" />
+   <WVObjectSize size="30" />
    <wvobject fp_name="/main/clk" type="logic">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -31,12 +31,12 @@
       <wvobject fp_name="/main/ip[1]" type="array">
          <obj_property name="ElementShortName">[1][18:1]</obj_property>
          <obj_property name="ObjectShortName">[1][18:1]</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
          <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
          <obj_property name="CellHeight">100</obj_property>
-         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
          <obj_property name="AnalogYRangeType">ANALOG_YRANGETYPE_FIXED</obj_property>
-         <obj_property name="AnalogYRangeMin">-6500.000000</obj_property>
-         <obj_property name="AnalogYRRangeMax">6500.000000</obj_property>
+         <obj_property name="AnalogYRangeMin">-6000.000000</obj_property>
+         <obj_property name="AnalogYRRangeMax">6000.000000</obj_property>
          <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
          <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
          <obj_property name="AnalogHorizLine">0.000000</obj_property>
@@ -44,6 +44,15 @@
       <wvobject fp_name="/main/ip[0]" type="array">
          <obj_property name="ElementShortName">[0][18:1]</obj_property>
          <obj_property name="ObjectShortName">[0][18:1]</obj_property>
+         <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+         <obj_property name="CellHeight">100</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+         <obj_property name="AnalogYRangeType">ANALOG_YRANGETYPE_FIXED</obj_property>
+         <obj_property name="AnalogYRangeMin">-2000.000000</obj_property>
+         <obj_property name="AnalogYRRangeMax">2000.000000</obj_property>
+         <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
+         <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
+         <obj_property name="AnalogHorizLine">0.000000</obj_property>
       </wvobject>
    </wvobject>
    <wvobject fp_name="/main/qp" type="array">
@@ -53,12 +62,12 @@
       <wvobject fp_name="/main/qp[1]" type="array">
          <obj_property name="ElementShortName">[1][18:1]</obj_property>
          <obj_property name="ObjectShortName">[1][18:1]</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
          <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
          <obj_property name="CellHeight">100</obj_property>
-         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
          <obj_property name="AnalogYRangeType">ANALOG_YRANGETYPE_FIXED</obj_property>
-         <obj_property name="AnalogYRangeMin">-6500.000000</obj_property>
-         <obj_property name="AnalogYRRangeMax">6500.000000</obj_property>
+         <obj_property name="AnalogYRangeMin">-6000.000000</obj_property>
+         <obj_property name="AnalogYRRangeMax">6000.000000</obj_property>
          <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
          <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
          <obj_property name="AnalogHorizLine">0.000000</obj_property>
@@ -66,6 +75,15 @@
       <wvobject fp_name="/main/qp[0]" type="array">
          <obj_property name="ElementShortName">[0][18:1]</obj_property>
          <obj_property name="ObjectShortName">[0][18:1]</obj_property>
+         <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
+         <obj_property name="CellHeight">100</obj_property>
+         <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+         <obj_property name="AnalogYRangeType">ANALOG_YRANGETYPE_FIXED</obj_property>
+         <obj_property name="AnalogYRangeMin">-2000.000000</obj_property>
+         <obj_property name="AnalogYRRangeMax">2000.000000</obj_property>
+         <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
+         <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
+         <obj_property name="AnalogHorizLine">0.000000</obj_property>
       </wvobject>
    </wvobject>
    <wvobject fp_name="/main/epoch" type="array">
@@ -105,6 +123,10 @@
    <wvobject fp_name="/main/ch1/boc1_full" type="logic">
       <obj_property name="ElementShortName">boc1_full</obj_property>
       <obj_property name="ObjectShortName">boc1_full</obj_property>
+   </wvobject>
+   <wvobject fp_name="/main/ch1/boc6to1" type="array">
+      <obj_property name="ElementShortName">boc6to1[2:0]</obj_property>
+      <obj_property name="ObjectShortName">boc6to1[2:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/main/ch1/ca_en" type="logic">
       <obj_property name="ElementShortName">ca_en</obj_property>
@@ -149,8 +171,8 @@
       <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
       <obj_property name="CellHeight">100</obj_property>
       <obj_property name="AnalogYRangeType">ANALOG_YRANGETYPE_FIXED</obj_property>
-      <obj_property name="AnalogYRangeMin">-10000000.000000</obj_property>
-      <obj_property name="AnalogYRRangeMax">10000000.000000</obj_property>
+      <obj_property name="AnalogYRangeMin">-30000000.000000</obj_property>
+      <obj_property name="AnalogYRRangeMax">30000000.000000</obj_property>
       <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
       <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
       <obj_property name="AnalogHorizLine">0.000000</obj_property>
@@ -162,8 +184,8 @@
       <obj_property name="WaveformStyle">STYLE_ANALOG</obj_property>
       <obj_property name="CellHeight">100</obj_property>
       <obj_property name="AnalogYRangeType">ANALOG_YRANGETYPE_FIXED</obj_property>
-      <obj_property name="AnalogYRangeMin">-10000000.000000</obj_property>
-      <obj_property name="AnalogYRRangeMax">10000000.000000</obj_property>
+      <obj_property name="AnalogYRangeMin">-2000000.000000</obj_property>
+      <obj_property name="AnalogYRRangeMax">2000000.000000</obj_property>
       <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
       <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
       <obj_property name="AnalogHorizLine">0.000000</obj_property>
@@ -180,7 +202,7 @@
       <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
       <obj_property name="AnalogYRangeType">ANALOG_YRANGETYPE_FIXED</obj_property>
       <obj_property name="AnalogYRangeMin">0.000000</obj_property>
-      <obj_property name="AnalogYRRangeMax">30000000.000000</obj_property>
+      <obj_property name="AnalogYRRangeMax">100000000.000000</obj_property>
       <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
       <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
       <obj_property name="AnalogHorizLine">0.000000</obj_property>
@@ -219,7 +241,7 @@
       <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
       <obj_property name="AnalogYRangeType">ANALOG_YRANGETYPE_FIXED</obj_property>
       <obj_property name="AnalogYRangeMin">0.000000</obj_property>
-      <obj_property name="AnalogYRRangeMax">30000000.000000</obj_property>
+      <obj_property name="AnalogYRRangeMax">100000000.000000</obj_property>
       <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
       <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
       <obj_property name="AnalogHorizLine">0.000000</obj_property>
@@ -232,7 +254,7 @@
       <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
       <obj_property name="AnalogYRangeType">ANALOG_YRANGETYPE_FIXED</obj_property>
       <obj_property name="AnalogYRangeMin">0.000000</obj_property>
-      <obj_property name="AnalogYRRangeMax">30000000.000000</obj_property>
+      <obj_property name="AnalogYRRangeMax">100000000.000000</obj_property>
       <obj_property name="AnalogInterpolation">ANALOG_INTERPOLATION_LINEAR</obj_property>
       <obj_property name="AnalogOffscale">ANALOG_OFFSCALE_HIDE</obj_property>
       <obj_property name="AnalogHorizLine">0.000000</obj_property>

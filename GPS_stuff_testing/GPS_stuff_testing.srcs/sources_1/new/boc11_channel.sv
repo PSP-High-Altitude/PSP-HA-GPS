@@ -65,24 +65,23 @@ module boc11_channel
     end
     
     // Generate boc1 clock
-    reg [1:0] boc6to1 = 2'd2;
+    reg [2:0] boc6to1 = 3'd5;
     reg [1:0] boc6to2 = 2'd2;
     reg boc1_full;
-    reg boc1_half;
     reg dll_clk;
     always @ (posedge ca_en) boc6to2 = 2'd2;
     always @ (posedge boc6_full or negedge boc6_full) begin
         // Generate BOC1
-        if (~boc6_full) begin
-            if(boc6to1 == 2'd1) begin
-                boc1_half = 1;
+        if (boc6_full) begin
+            if(boc6to1 == 3'd5) begin
+                boc1_full <= 1;
+                boc6to1 <= 3'd0;
+            end else if (boc6to1 == 3'd2) begin
+                boc1_full <= 0;
+                boc6to1 <= boc6to1 + 3'd1;
+            end else begin
+                boc6to1 <= boc6to1 + 3'd1;
             end
-        end else if (boc6to1 == 2'd2) begin
-            boc6to1  = 2'd0;
-            boc1_full = ~boc1_full;
-            boc1_half = 0;
-        end else begin
-            boc6to1 = boc6to1 + 1;
         end
         
         // Generate clock for spacing codes
@@ -164,33 +163,41 @@ module boc11_channel
     reg [31:0] new_lo_rate;
     reg signed [31:0] ch_power;
     
+    // Code and Carrier Tracking
     always @ (posedge epoch_filt) begin
         // Delay locked loop error calculations
-        power_very_early = (longint'(ive)**2)+(longint'(qve)**2);
         power_early = (longint'(ie)**2)+(longint'(qe)**2);
         power_late = (longint'(il)**2)+(longint'(ql)**2);
+        power_very_early = (longint'(ive)**2)+(longint'(qve)**2);
         power_very_late = (longint'(ivl)**2)+(longint'(qvl)**2);
         ch_power = (longint'(ip)**2)+(longint'(qp)**2);
         code_phase_err = power_early - power_late;
         
         // CA code tracking loop
         new_ca_freq_integrator = ca_freq_integrator + (code_phase_err <<< 12);
-        new_ca_rate_long = ca_freq_integrator + (code_phase_err <<< 19);
+        new_ca_rate_long = ca_freq_integrator + (code_phase_err <<< 21);
         new_ca_rate = new_ca_rate_long[63:32];
+        
+        ca_freq_integrator = new_ca_freq_integrator;
+        ca_rate = new_ca_rate;
         
         // Carrier tracking loop
         carrier_phase_err = ip*qp;
-        new_lo_freq_integrator = lo_freq_integrator + (carrier_phase_err <<< 10);
-        new_lo_rate_long = lo_freq_integrator + (carrier_phase_err <<< 20);
+        new_lo_freq_integrator = lo_freq_integrator + (carrier_phase_err <<< 15);
+        new_lo_rate_long = lo_freq_integrator + (carrier_phase_err <<< 19);
         new_lo_rate = new_lo_rate_long[63:32];
         
-        ca_freq_integrator = new_ca_freq_integrator;
         lo_freq_integrator = new_lo_freq_integrator;
-        ca_rate = new_ca_rate;
         lo_rate = new_lo_rate;
         
-        // Save the final state of the accumulators
-        tracked_outs <= {ie, qe, ip, qp, il, ql};
+        // Bump-jump
+        //if(power_very_late > ch_power) begin
+        //    boc1_full <= 0;
+        //    boc6to1 <= boc6to1 + 3'd3;
+        //end
+        //if(power_very_early > ch_power) begin
+        //    boc6to1 <= boc6to1 + 3'd3;
+        //end
     
         // Reset accumulators for next epoch
         ive <= 0;
@@ -203,6 +210,9 @@ module boc11_channel
         ql <= 0;
         ivl <= 0;
         qvl <= 0;
+        
+        // Save the final state of the accumulators
+        tracked_outs <= {ie, qe, ip, qp, il, ql};
     end
     
     // Reset everything!
@@ -216,7 +226,6 @@ module boc11_channel
        
         // BOC
         boc1_full <= 0;
-        boc1_half <= 0;
         dll_clk <= 0;
         
         // Integrators
