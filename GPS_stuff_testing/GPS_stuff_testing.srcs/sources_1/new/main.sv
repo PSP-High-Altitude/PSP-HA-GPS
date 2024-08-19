@@ -74,7 +74,7 @@ module main(
     assign qp[1] = tracked_outs[1][54:37];
     
     always @(posedge epoch[1]) begin
-        if(sav_num < 499) begin
+        if(sav_num < 99) begin
             $fdisplay(fd, "%d,%d", ip[1], qp[1]);
             sav_num = sav_num + 1;
         end else begin

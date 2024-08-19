@@ -9,28 +9,22 @@
 #include "math.h"
 
 const int sv[NUM_CHANNELS] = {
-    30,
-    31,
-    29,
-    1,
+    2,
+    4,
+    5,
     21,
-    25,
 };
 const double lo_dop[NUM_CHANNELS] = {
-    -2162,
-    -1900,
-    -2200,
-    1350,
-    2050,
-    -3650,
+    1600,
+    -3000,
+    1400,
+    -2400,
 };
 const double ca_shift[NUM_CHANNELS] = {
-    857.8,
-    534.4,
-    39.9,
-    198.2,
-    962.4,
-    435.9,
+    7.0,
+    367.0,
+    969.4,
+    817.4,
 };
 
 uint8_t file_buf;
@@ -44,7 +38,7 @@ int main()
 {
     printf("lon,lat,alt\n");
 
-    file = fopen("gps.samples.1bit.I.fs5456.if4092.bin", "rb");
+    file = fopen("../gnss-20170427-L1.1bit.I.bin", "rb");
     channel_t channels[NUM_CHANNELS];
     for (int i = 0; i < NUM_CHANNELS; i++)
     {
@@ -86,8 +80,6 @@ int main()
                 &channels[1],
                 &channels[2],
                 &channels[3],
-                &channels[4],
-                &channels[5],
             };
             uint8_t ready = 1;
             for (int i = 0; i < NUM_CHANNELS; i++)

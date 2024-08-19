@@ -1,5 +1,5 @@
-#ifndef CHANNEL_H
-#define CHANNEL_H
+#ifndef E1B_CHANNEL_H
+#define E1B_CHANNEL_H
 
 #include "gps.h"
 #include "stdint.h"
@@ -9,11 +9,9 @@
 
 typedef struct
 {
-    uint8_t T0;
-    uint8_t T1;
-    uint16_t g1;
-    uint16_t g2;
-} ca_t;
+    uint8_t sv;
+    uint16_t chip;
+} e1b_ca_t;
 
 typedef struct
 {
@@ -27,7 +25,7 @@ typedef struct
     uint64_t lo_freq_integrator;
     uint64_t phase_offset;
 
-    ca_t ca;
+    e1b_ca_t ca;
     int64_t ie;
     int64_t qe;
     int64_t ip;
@@ -50,11 +48,11 @@ typedef struct
     uint8_t last_bit;
 
     ephemeris_t ephm;
-} channel_t;
+} e1b_channel_t;
 
-void clock_ca(ca_t *ca);
-uint8_t get_ca(ca_t *ca);
-void init_channel(channel_t *chan, int chan_num, int sv, double lo_dop, double ca_shift);
-void clock_channel(channel_t *chan, uint8_t sample);
+void clock_ca(e1b_ca_t *ca);
+uint8_t get_ca(e1b_ca_t *ca);
+void init_channel(e1b_channel_t *chan, int chan_num, int sv, double lo_dop, double ca_shift);
+void clock_channel(e1b_channel_t *chan, uint8_t sample);
 
 #endif
