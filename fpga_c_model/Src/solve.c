@@ -1,36 +1,9 @@
 #include "solve.h"
 #include "channel.h"
+#include "ephemeris.h"
 #include "gps.h"
 #include "math.h"
 #include "stdio.h"
-
-extern const int SVs[];
-
-double get_tx_time(channel_t *chan)
-{
-    ca_t ca;
-    ca.T0 = SVs[chan->sv * 4 + 2];
-    ca.T1 = SVs[chan->sv * 4 + 3];
-    ca.g1 = 0x3FF;
-    ca.g2 = 0x3FF;
-    uint16_t chips = 0;
-    while (ca.g1 != chan->ca.g1)
-    {
-        chips++;
-        clock_ca(&ca);
-    }
-
-    double t = chan->last_z_count * 6.0 +
-               chan->nav_bit_count / 50.0 +
-               chan->nav_ms / 1000.0 +
-               chips / 1023000.0 +
-               (chan->ca_phase + (1U << 31)) * pow(2, -32) / 1023000.0;
-
-    // if (chan->sv + 1 == 29)
-    //     printf("%d,%u,%u,%u,%lu,%.10f\n", chan->last_z_count, chan->nav_bit_count, chan->nav_ms, chips, chan->ca_phase, t);
-
-    return t;
-}
 
 uint8_t solve(channel_t **chan, int num_chans, double *x, double *y, double *z, double *t_bias)
 {

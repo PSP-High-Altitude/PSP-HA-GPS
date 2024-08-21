@@ -44,15 +44,17 @@ typedef struct
     uint8_t nav_buf[NAV_BUFFER_SIZE + 1];
     uint16_t nav_bit_count;
     uint8_t nav_valid;
-    int32_t last_z_count;
     uint8_t last_bit;
+    uint8_t last_page_half;
+    uint8_t last_page_type;
+    uint8_t last_t0;
 
     ephemeris_t ephm;
 } e1b_channel_t;
 
-void clock_ca(e1b_ca_t *ca);
-uint8_t get_ca(e1b_ca_t *ca);
-void init_channel(e1b_channel_t *chan, int chan_num, int sv, double lo_dop, double ca_shift);
-void clock_channel(e1b_channel_t *chan, uint8_t sample);
+void e1b_clock_ca(e1b_ca_t *ca);
+uint8_t e1b_get_ca(e1b_ca_t *ca);
+void e1b_init_channel(e1b_channel_t *chan, int chan_num, int sv, double lo_dop, double ca_shift);
+void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample);
 
 #endif

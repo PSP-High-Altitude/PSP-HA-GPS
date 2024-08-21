@@ -24,4 +24,6 @@ int fifo_peek(fifo* f, uint8_t* data, uint16_t size);
 
 uint16_t fifo_size(fifo* f);
 
+void bytes_to_number(void *dest, uint8_t *buf, int dest_size, int src_size, uint8_t sign);
+
 #endif

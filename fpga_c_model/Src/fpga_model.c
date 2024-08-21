@@ -4,27 +4,18 @@
 
 #include "tools.h"
 #include "gps.h"
-#include "channel.h"
+#include "e1b_channel.h"
 #include "solve.h"
 #include "math.h"
 
 const int sv[NUM_CHANNELS] = {
-    2,
-    4,
-    5,
-    21,
+    24,
 };
 const double lo_dop[NUM_CHANNELS] = {
-    1600,
-    -3000,
-    1400,
-    -2400,
+    -246.0,
 };
 const double ca_shift[NUM_CHANNELS] = {
-    7.0,
-    367.0,
-    969.4,
-    817.4,
+    2837.5
 };
 
 uint8_t file_buf;
@@ -39,10 +30,10 @@ int main()
     printf("lon,lat,alt\n");
 
     file = fopen("../gnss-20170427-L1.1bit.I.bin", "rb");
-    channel_t channels[NUM_CHANNELS];
+    e1b_channel_t channels[NUM_CHANNELS];
     for (int i = 0; i < NUM_CHANNELS; i++)
     {
-        init_channel(&channels[i], i, sv[i] - 1, lo_dop[i], ca_shift[i]);
+        e1b_init_channel(&channels[i], i, sv[i] - 1, lo_dop[i], ca_shift[i]);
     }
 
     while (time_limit--)
@@ -68,14 +59,14 @@ int main()
         uint8_t sample = (file_buf >> file_buf_idx) & 0x1;
         for (int i = 0; i < NUM_CHANNELS; i++)
         {
-            clock_channel(&channels[i], sample);
+            e1b_clock_channel(&channels[i], sample);
         }
 
         if (clock % (lrint(fs) / 10) == 0)
         {
             double x, y, z, t_bias;
             double lat, lon, alt;
-            channel_t *channels_in_soln[] = {
+            e1b_channel_t *channels_in_soln[] = {
                 &channels[0],
                 &channels[1],
                 &channels[2],
@@ -90,11 +81,12 @@ int main()
                     break;
                 }
             }
+            /*
             if (ready && solve(channels_in_soln, NUM_CHANNELS, &x, &y, &z, &t_bias))
             {
                 // printf("x: %g, y: %g, z: %g, t_bias: %g\n", x, y, z, t_bias);
                 to_coords(x, y, z, &lat, &lon, &alt);
-                /*if (avg_count < AVG_COUNT)
+                if (avg_count < AVG_COUNT)
                 {
                     avg_lat[avg_count] = lat;
                     avg_lon[avg_count] = lon;
@@ -124,9 +116,10 @@ int main()
                     alt /= AVG_COUNT;
                     printf("%.8f,%.8f,%.8f\n", lon, lat, alt);
                 }
-                */
+                
                 printf("%.8f,%.8f,%.8f\n", lon, lat, alt);
             }
+            */
         }
 
         clock++;

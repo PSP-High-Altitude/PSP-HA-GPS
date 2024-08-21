@@ -5,6 +5,6 @@
 #define fc 9.334875e6
 #define PI 3.1415926535898
 
-#define NUM_CHANNELS 4
+#define NUM_CHANNELS 1
 
 #endif

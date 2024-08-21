@@ -1,11 +1,11 @@
-#include "ephemeris.h"
+#include "e1b_ephemeris.h"
 #include "gps.h"
 #include "string.h"
 #include "stdio.h"
 #include "math.h"
 #include "tools.h"
 
-void save_ephemeris_data(uint8_t *buf, ephemeris_t *ephm)
+void e1b_save_ephemeris_data(uint8_t *buf, e1b_ephemeris_t *ephm)
 {
     uint8_t subframe_id;
     bytes_to_number(&subframe_id, buf + 49, 8, 3, 0);
@@ -83,7 +83,7 @@ void save_ephemeris_data(uint8_t *buf, ephemeris_t *ephm)
     }
 }
 
-double time_from_epoch(double t, double t_epoch)
+double e1b_time_from_epoch(double t, double t_epoch)
 {
     t -= t_epoch;
     if (t > 302400)
@@ -97,7 +97,7 @@ double time_from_epoch(double t, double t_epoch)
     return t;
 }
 
-double eccentric_anomaly(ephemeris_t *ephm, double t_k)
+double e1b_eccentric_anomaly(e1b_ephemeris_t *ephm, double t_k)
 {
     double root_A = ephm->root_A * pow(2, -19);
     double delta_n = ephm->delta_n * pow(2, -43) * PI;
@@ -124,7 +124,7 @@ double eccentric_anomaly(ephemeris_t *ephm, double t_k)
     return E_k;
 }
 
-void get_satellite_ecef(ephemeris_t *ephm, double t, double *x, double *y, double *z)
+void e1b_get_satellite_ecef(e1b_ephemeris_t *ephm, double t, double *x, double *y, double *z)
 {
     double root_A = ephm->root_A * pow(2, -19);
     double e = ephm->e * pow(2, -33);
@@ -142,8 +142,8 @@ void get_satellite_ecef(ephemeris_t *ephm, double t, double *x, double *y, doubl
     double t_oe = ephm->t_oe * pow(2, 4);
 
     double A = root_A * root_A;
-    double t_k = time_from_epoch(t, t_oe);
-    double E_k = eccentric_anomaly(ephm, t_k);
+    double t_k = e1b_time_from_epoch(t, t_oe);
+    double E_k = e1b_eccentric_anomaly(ephm, t_k);
     double v_k = atan2(sqrt(1 - e * e) * sin(E_k), cos(E_k) - e);
     double phi_k = v_k + omega;
     double delta_u_k = C_us * sin(2 * phi_k) + C_uc * cos(2 * phi_k);
@@ -161,7 +161,7 @@ void get_satellite_ecef(ephemeris_t *ephm, double t, double *x, double *y, doubl
     *z = y_k_prime * sin(i_k);
 }
 
-double get_clock_correction(ephemeris_t *ephm, double t)
+double e1b_get_clock_correction(e1b_ephemeris_t *ephm, double t)
 {
     double a_f0 = ephm->a_f0 * pow(2, -31);
     double a_f1 = ephm->a_f1 * pow(2, -43);
@@ -172,10 +172,10 @@ double get_clock_correction(ephemeris_t *ephm, double t)
     double t_oc = ephm->t_oc * pow(2, 4);
     double T_GD = ephm->T_GD * pow(2, -31);
 
-    double t_k = time_from_epoch(t, t_oe);
-    double E_k = eccentric_anomaly(ephm, t_k);
+    double t_k = e1b_time_from_epoch(t, t_oe);
+    double E_k = e1b_eccentric_anomaly(ephm, t_k);
     double t_R = F * e * root_A * sin(E_k);
-    t = time_from_epoch(t, t_oc);
+    t = e1b_time_from_epoch(t, t_oc);
 
     return a_f0 +
            a_f1 * t +

@@ -56,5 +56,5 @@ void clock_ca(ca_t *ca);
 uint8_t get_ca(ca_t *ca);
 void init_channel(channel_t *chan, int chan_num, int sv, double lo_dop, double ca_shift);
 void clock_channel(channel_t *chan, uint8_t sample);
-
+double get_tx_time(channel_t *chan);
 #endif

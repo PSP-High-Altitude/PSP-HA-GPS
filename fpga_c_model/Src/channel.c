@@ -3,9 +3,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
-
-const uint8_t lo_sin[] = {0, 0, 1, 1};
-const uint8_t lo_cos[] = {0, 1, 1, 0};
+#include "waves.h"
 
 double clock_save[300][32];
 uint8_t nav_ms_save[300][32];
@@ -444,4 +442,30 @@ void clock_channel(channel_t *chan, uint8_t sample)
     {
         chan->tracked_this_epoch = 0;
     }
+}
+
+double get_tx_time(channel_t *chan)
+{
+    ca_t ca;
+    ca.T0 = SVs[chan->sv * 4 + 2];
+    ca.T1 = SVs[chan->sv * 4 + 3];
+    ca.g1 = 0x3FF;
+    ca.g2 = 0x3FF;
+    uint16_t chips = 0;
+    while (ca.g1 != chan->ca.g1)
+    {
+        chips++;
+        clock_ca(&ca);
+    }
+
+    double t = chan->last_z_count * 6.0 +
+               chan->nav_bit_count / 50.0 +
+               chan->nav_ms / 1000.0 +
+               chips / 1023000.0 +
+               (chan->ca_phase + (1U << 31)) * pow(2, -32) / 1023000.0;
+
+    // if (chan->sv + 1 == 29)
+    //     printf("%d,%u,%u,%u,%lu,%.10f\n", chan->last_z_count, chan->nav_bit_count, chan->nav_ms, chips, chan->ca_phase, t);
+
+    return t;
 }

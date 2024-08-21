@@ -3,15 +3,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include "waves.h"
 
-const uint8_t lo_sin[] = {0, 0, 1, 1};
-const uint8_t lo_cos[] = {0, 1, 1, 0};
-const uint8_t sc[] = {0, 1};
-
-double clock_save[300][32];
-uint8_t nav_ms_save[300][32];
-int64_t ip_save[300][32];
-uint16_t save_idx[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+double e1b_clock_save[1000][32];
+uint8_t e1b_nav_ms_save[1000][32];
+int64_t e1b_ip_save[1000][32];
+int64_t e1b_qp_save[1000][32];
+uint16_t e1b_save_idx[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 extern uint64_t clock;
 
@@ -68,29 +66,118 @@ const uint8_t e1_code[50][512] = {
     {0x97, 0x05, 0x1F, 0xC6, 0x7A, 0xCA, 0x30, 0xE8, 0xAE, 0xE7, 0x3D, 0x3A, 0x8C, 0xF3, 0x8B, 0xB1, 0x35, 0x24, 0xD4, 0xE0, 0xEB, 0xD9, 0xBE, 0x68, 0x39, 0x8C, 0x7C, 0x16, 0x22, 0x7C, 0xAB, 0xB1, 0xD0, 0xB0, 0xA0, 0xAB, 0xE7, 0xB6, 0x38, 0x4A, 0xBA, 0x02, 0x90, 0x5B, 0xA0, 0xC3, 0xC7, 0x36, 0x35, 0x99, 0xD0, 0x59, 0xC7, 0xB4, 0xC9, 0x9D, 0xB1, 0x65, 0xCD, 0x14, 0xFA, 0x12, 0xFA, 0x79, 0x12, 0x44, 0x9C, 0xA7, 0xDD, 0x5E, 0x34, 0x6D, 0x80, 0x10, 0xC8, 0x5A, 0x75, 0x73, 0x82, 0x27, 0x0D, 0xAD, 0x15, 0xBA, 0x3C, 0xE3, 0x6A, 0x76, 0xEF, 0x55, 0xF8, 0x1A, 0x1E, 0x80, 0xBF, 0x36, 0x6B, 0x37, 0xFE, 0x3A, 0x88, 0xEC, 0x72, 0x20, 0x28, 0xC2, 0x5E, 0x23, 0x4E, 0x62, 0x40, 0x40, 0x45, 0x0A, 0x99, 0xCD, 0x80, 0x8F, 0x94, 0x25, 0x68, 0xAA, 0x71, 0x33, 0x98, 0x1D, 0x72, 0xE7, 0xF2, 0x92, 0x88, 0x94, 0x67, 0x0A, 0xD5, 0x39, 0x94, 0x82, 0xDF, 0x1B, 0x90, 0xE7, 0xE6, 0x40, 0x62, 0xF8, 0x30, 0xB7, 0x36, 0xC7, 0x9C, 0x30, 0xF3, 0x62, 0x81, 0x49, 0x5C, 0x76, 0x69, 0x9C, 0xD4, 0x84, 0x04, 0x67, 0x3F, 0xA3, 0x34, 0xF0, 0x42, 0xF9, 0xE0, 0xE6, 0x7D, 0xD7, 0xF3, 0x85, 0x3B, 0xF7, 0x1A, 0xBE, 0xAF, 0x6A, 0x9A, 0x55, 0x46, 0x85, 0x5E, 0x84, 0x0C, 0xE4, 0x2B, 0x22, 0x4D, 0x8F, 0x64, 0x90, 0xC6, 0xCE, 0x5F, 0xC0, 0x2E, 0xBA, 0xF4, 0xFF, 0xC3, 0x90, 0x10, 0x70, 0x58, 0xF5, 0x4C, 0xD6, 0x35, 0xD4, 0xA7, 0xF2, 0x87, 0x80, 0x99, 0xC1, 0xEF, 0x49, 0x57, 0x50, 0xE6, 0x92, 0x1B, 0xE2, 0xF3, 0x9A, 0xD8, 0x08, 0xC4, 0x21, 0x0F, 0x28, 0x73, 0x19, 0xF8, 0x11, 0xA2, 0x54, 0xCE, 0xF8, 0xCF, 0x15, 0x3F, 0xC5, 0x0A, 0xB2, 0xF3, 0xD6, 0x94, 0xA5, 0x30, 0x94, 0x9E, 0x5F, 0x57, 0x8D, 0x07, 0x5D, 0xB9, 0x6D, 0xDC, 0xF2, 0xBB, 0x90, 0xED, 0x3D, 0xE0, 0x9D, 0x9C, 0xA8, 0xE0, 0x86, 0x62, 0xFD, 0x89, 0x82, 0x74, 0x1D, 0xE1, 0xCE, 0x0A, 0x6B, 0x64, 0xC3, 0xD3, 0xD5, 0x00, 0x4B, 0x5C, 0x04, 0xB2, 0xB0, 0xDF, 0xD9, 0x76, 0xA2, 0x0F, 0xAC, 0xC9, 0x4D, 0x17, 0x62, 0xD4, 0x1E, 0xE0, 0x3B, 0x40, 0xD2, 0xCF, 0x36, 0x76, 0x12, 0x81, 0x2E, 0xF4, 0xCC, 0x41, 0xD1, 0xBF, 0xE9, 0xCE, 0xB5, 0x1A, 0xE3, 0xA2, 0x2A, 0xF1, 0xBE, 0x7B, 0x85, 0xA0, 0x57, 0xD3, 0x04, 0x8D, 0x0E, 0x73, 0xFA, 0x0F, 0xDA, 0xF1, 0x11, 0x9E, 0xFD, 0x76, 0xF0, 0xA4, 0x1B, 0xE6, 0x31, 0x28, 0xB2, 0x2D, 0x64, 0xA5, 0x55, 0x3E, 0x95, 0x49, 0xD4, 0x11, 0x48, 0x3B, 0xBC, 0xA1, 0x48, 0x3E, 0xF3, 0x0C, 0xF6, 0xA6, 0xD3, 0x17, 0xAD, 0x2C, 0x79, 0x73, 0xEF, 0xA6, 0xD4, 0xC1, 0x12, 0x1F, 0x70, 0x3D, 0x2F, 0x48, 0xFC, 0xDA, 0x31, 0x77, 0xAD, 0x45, 0x0D, 0x75, 0xD2, 0xA2, 0x8D, 0x2C, 0x24, 0x4A, 0xEA, 0x13, 0xF0, 0xE6, 0x0A, 0xEE, 0xD8, 0xAC, 0xBA, 0xB4, 0x44, 0xD4, 0x00, 0xDF, 0x5E, 0x28, 0x0D, 0xB7, 0x99, 0xB2, 0xD9, 0xA9, 0x84, 0xDF, 0x1E, 0x25, 0x67, 0xD3, 0x9D, 0x1D, 0xE5, 0x8E, 0xF7, 0x8C, 0xA6, 0xB4, 0xD8, 0xBC, 0x17, 0x2B, 0x07, 0xDC, 0xB0, 0x2D, 0x15, 0x6C, 0xA9, 0x6E, 0xEF, 0xAC, 0x69, 0xE5, 0x56, 0xCF, 0xCE, 0x0A, 0xAB, 0x61, 0x7C, 0x7F, 0xBB, 0x8C, 0x34, 0x87, 0x1C, 0x1D, 0x35, 0xE7, 0x4B, 0x7B, 0xD3, 0x07, 0xD3, 0xF2, 0xE4, 0x24, 0xC7, 0xA9, 0xAD, 0x67, 0x6A, 0x1A, 0x69, 0xE0, 0xFE, 0x73, 0x5E, 0xA5, 0x08, 0x87, 0xA1, 0xDF, 0xAE, 0x6C, 0xA2, 0xFE, 0x44, 0x60, 0xFC, 0x7E, 0xF3, 0x23, 0xAD, 0xE4, 0x93, 0x02, 0x00},
 };
 
-void clock_ca(e1b_ca_t *ca)
+uint32_t hamming_dist2(uint32_t val1, uint32_t val2) {
+  uint32_t dist = 0;
+  for (int i = 0; i < 2; i++) {
+    dist += (val1 & 0x1) ^ (val2 & 0x1);
+    val1 >>= 1;
+    val2 >>= 1;
+  }
+  return dist;
+}
+
+uint8_t get_conv_out(uint8_t state, uint8_t input) {
+  static uint8_t G1 = 0b1111001;
+  static uint8_t G2 = 0b1011011;
+
+  uint8_t conv_in = state | (input << 6);
+
+  // [7:2] res, [1:0] output bits
+  uint8_t result = 0;
+  result |= (__builtin_parity(conv_in & G1) << 1);
+  result |= (__builtin_parity(conv_in & G2) == 0);
+
+  return result;
+}
+
+void viterbi_decode(uint8_t *data, uint8_t *result) {
+  static const uint8_t nstates = 64;
+  static const uint8_t ninput = 240;
+  static const uint8_t rate = 2;
+
+  uint32_t path_metric[nstates][ninput / rate + 1];
+
+  // Setup initial state
+  memset(path_metric, 0xFF, sizeof(path_metric));
+  path_metric[0][0] = 0;
+
+  // Create trellis
+  for (int j = 0; j < ninput / rate; j++) {
+
+    for (uint8_t i = 0; i < nstates; i++) {
+      // skip unaccessible states
+      if (path_metric[i][j] == 0xFFFFFFFF)
+        continue;
+
+      // input bit 0
+      uint8_t next_state = (i >> 1);
+      uint32_t conv_out = get_conv_out(i, 0);
+      uint8_t rcvd = (data[j * rate] << 1) | data[j * rate + 1];
+      uint32_t dist = hamming_dist2(rcvd, conv_out);
+      if (path_metric[next_state][j + 1] > path_metric[i][j] + dist) {
+        path_metric[next_state][j + 1] = path_metric[i][j] + dist;
+      }
+      // input bit 1
+      next_state |= 0b100000;
+      conv_out = get_conv_out(i, 1);
+      dist = hamming_dist2(rcvd, conv_out);
+      if (path_metric[next_state][j + 1] > path_metric[i][j] + dist) {
+        path_metric[next_state][j + 1] = path_metric[i][j] + dist;
+      }
+    }
+  }
+
+  // Find best ending
+  uint8_t best_state = 0;
+  uint32_t best_metric = 0xFFFFFFFF;
+  for (int i = 0; i < nstates; i++) {
+    if (path_metric[i][ninput / rate] < best_metric) {
+      best_metric = path_metric[i][ninput / rate];
+      best_state = i;
+    }
+  }
+
+  // Traceback through best path
+  for (int i = ninput / rate - 1; i >= 0; i--) {
+    result[i] = (best_state >> 5) & 1;
+
+    // Zero path
+    uint8_t previous_state = (best_state << 1) & 0b111111;
+    best_metric = path_metric[previous_state][i];
+    best_state = previous_state;
+
+    // One path
+    previous_state = (best_state | 1);
+    if (path_metric[previous_state][i] < best_metric) {
+      best_metric = path_metric[previous_state][i];
+      best_state = previous_state;
+    }
+  }
+}
+
+void e1b_clock_ca(e1b_ca_t *ca)
 {
     ca->chip = (ca->chip + 1) % 4092;
 }
 
-uint8_t get_ca(e1b_ca_t *ca)
+uint8_t e1b_get_ca(e1b_ca_t *ca)
 {
     return (e1_code[ca->sv][ca->chip >> 3] >> (7 - (ca->chip & 7))) & 1;
 }
 
-uint8_t is_ca_epoch(e1b_ca_t *ca)
+uint8_t e1b_is_ca_epoch(e1b_ca_t *ca)
 {
     return ca->chip == 0;
 }
 
-void init_channel(e1b_channel_t *chan, int chan_num, int sv, double lo_dop, double ca_shift)
+void e1b_init_channel(e1b_channel_t *chan, int chan_num, int sv, double lo_dop, double ca_shift)
 {
     chan->chan_num = chan_num;
     chan->sv = sv;
-    const double ca_dop = lo_dop / 1575.42e6 * 6138000.0;
+    const double ca_dop = lo_dop / 1575.42e6 * 1023000.0;
     chan->phase_offset = (uint32_t)(fs / 125 - (ca_shift * fs / 1023000.0)) % ((int64_t)fs / 250);
 
-    chan->ca_rate = (uint32_t)((6138000.0 + ca_dop) / fs * pow(2, 32));
+    chan->ca_rate = (uint32_t)((1023000.0 + ca_dop) / fs * pow(2, 32));
     chan->lo_rate = (uint32_t)((fc + lo_dop) / fs * pow(2, 32));
 
     chan->ca_phase = 0;
@@ -112,25 +199,33 @@ void init_channel(e1b_channel_t *chan, int chan_num, int sv, double lo_dop, doub
     chan->total_ms = 0;
     chan->nav_valid = 0;
     chan->nav_bit_count = 0;
-    chan->last_z_count = 0;
+    chan->last_page_half = 0;
+    chan->last_page_type = 0;
     chan->last_bit = 2;
+    chan->last_t0 = 0;
     memset(&chan->ephm, 0, sizeof(ephemeris_t));
 }
 
-void do_sample(e1b_channel_t *chan, uint8_t sample)
+void e1b_do_sample(e1b_channel_t *chan, uint8_t sample)
 {
+    if(!chan->ca_en) 
+        return;
     uint8_t lo_i = lo_sin[chan->lo_phase >> 30];
     uint8_t lo_q = lo_cos[chan->lo_phase >> 30];
+
+    static uint8_t test_idx = 0;
+    uint8_t boc11 = sc[(chan->ca_phase >> 31) & 0x1];
+    uint8_t boc61 = sc[(uint8_t)(((double)chan->ca_phase / pow(2, 32)) * 12) % 2];
 
     uint8_t die, dqe, dip, dqp, dil, dql;
 
     // Mixers
-    die = sample ^ chan->ca_e ^ lo_i;
-    dqe = sample ^ chan->ca_e ^ lo_q;
-    dip = sample ^ chan->ca_p ^ lo_i;
-    dqp = sample ^ chan->ca_p ^ lo_q;
-    dil = sample ^ chan->ca_l ^ lo_i;
-    dql = sample ^ chan->ca_l ^ lo_q;
+    die = sample ^ chan->ca_e ^ lo_i ^ boc61;
+    dqe = sample ^ chan->ca_e ^ lo_q ^ boc61;
+    dip = sample ^ chan->ca_p ^ lo_i ^ boc11;
+    dqp = sample ^ chan->ca_p ^ lo_q ^ boc11;
+    dil = sample ^ chan->ca_l ^ lo_i ^ boc61;
+    dql = sample ^ chan->ca_l ^ lo_q ^ boc61;
 
     // Integrators
     chan->ie = chan->ca_en ? (chan->ie + (die ? -1 : 1)) : 0;
@@ -141,115 +236,122 @@ void do_sample(e1b_channel_t *chan, uint8_t sample)
     chan->ql = chan->ca_en ? (chan->ql + (dql ? -1 : 1)) : 0;
 }
 
-void process_ip_to_bit(e1b_channel_t *chan)
+void e1b_process_ip_to_bit(e1b_channel_t *chan)
 {
-    if (save_idx[chan->sv] < 300)
-        clock_save[save_idx[chan->sv]][chan->sv] = clock / fs;
-    if (save_idx[chan->sv] < 300)
-        ip_save[save_idx[chan->sv]][chan->sv] = chan->ip;
-    if (save_idx[chan->sv] < 300)
-        nav_ms_save[save_idx[chan->sv]++][chan->sv] = chan->nav_ms;
+    if (e1b_save_idx[chan->sv] < 300) {
+        e1b_clock_save[e1b_save_idx[chan->sv]][chan->sv] = clock / fs;
+        e1b_ip_save[e1b_save_idx[chan->sv]][chan->sv] = chan->ip;
+        e1b_qp_save[e1b_save_idx[chan->sv]++][chan->sv] = chan->qp;
+        //e1b_nav_ms_save[e1b_save_idx[chan->sv]++][chan->sv] = chan->nav_ms;
+    }
 
-    if (chan->last_bit == 2)
-    { // Initial state
-        chan->last_bit = (chan->ip > 0) ? 1 : 0;
+    uint8_t bit = (chan->ip > 0) ? 1 : 0;
+    if (chan->nav_bit_count < 300)
+    {
+        chan->nav_buf[chan->nav_bit_count++] = bit;
     }
-    else if (chan->nav_ms == 19)
-    { // 20ms rollover
-        uint8_t bit = (chan->ip > 0) ? 1 : 0;
-        if (chan->nav_bit_count < 300)
-        {
-            chan->nav_buf[chan->nav_bit_count++] = bit;
-        }
-        chan->last_bit = (chan->ip > 0) ? 1 : 0;
-        chan->nav_ms = 0;
-    }
-    else if (chan->last_bit != ((chan->ip > 0) ? 1 : 0))
-    { // Unexpected transition
-        chan->last_bit = (chan->ip > 0) ? 1 : 0;
-        chan->nav_ms = 0;
-    }
-    else
-    { // Middle of bit
-        chan->nav_ms++;
-    }
-    chan->total_ms++;
+    chan->last_bit = bit;
+    chan->nav_ms = 0;
+    chan->total_ms+=4;
 
     // printf("SV: %d\n\tBit: %d\n\tms: %d\n", chan->sv + 1, chan->last_bit, chan->nav_ms);
 }
 
-uint8_t check_parity(uint8_t *bits, uint8_t *p, uint8_t D29, uint8_t D30)
+uint8_t e1b_process_message(e1b_channel_t *chan)
 {
-    // D29 and D30 are the bits from the previous word
-    uint8_t *d = bits - 1;
-    for (uint8_t i = 1; i < 25; i++)
-        d[i] ^= D30; // Flip to correct polarity as we go
-    p[0] = D29 ^ d[1] ^ d[2] ^ d[3] ^ d[5] ^ d[6] ^ d[10] ^ d[11] ^ d[12] ^ d[13] ^ d[14] ^ d[17] ^ d[18] ^ d[20] ^ d[23];
-    p[1] = D30 ^ d[2] ^ d[3] ^ d[4] ^ d[6] ^ d[7] ^ d[11] ^ d[12] ^ d[13] ^ d[14] ^ d[15] ^ d[18] ^ d[19] ^ d[21] ^ d[24];
-    p[2] = D29 ^ d[1] ^ d[3] ^ d[4] ^ d[5] ^ d[7] ^ d[8] ^ d[12] ^ d[13] ^ d[14] ^ d[15] ^ d[16] ^ d[19] ^ d[20] ^ d[22];
-    p[3] = D30 ^ d[2] ^ d[4] ^ d[5] ^ d[6] ^ d[8] ^ d[9] ^ d[13] ^ d[14] ^ d[15] ^ d[16] ^ d[17] ^ d[20] ^ d[21] ^ d[23];
-    p[4] = D30 ^ d[1] ^ d[3] ^ d[5] ^ d[6] ^ d[7] ^ d[9] ^ d[10] ^ d[14] ^ d[15] ^ d[16] ^ d[17] ^ d[18] ^ d[21] ^ d[22] ^ d[24];
-    p[5] = D29 ^ d[3] ^ d[5] ^ d[6] ^ d[8] ^ d[9] ^ d[10] ^ d[11] ^ d[13] ^ d[15] ^ d[19] ^ d[22] ^ d[23] ^ d[24];
+    static const uint8_t sync_word[] = {0, 1, 0, 1, 1, 0, 0, 0, 0, 0};
+    static const uint8_t inv_sync_word[] = {1, 0, 1, 0, 0, 1, 1, 1, 1, 1};
+    static const uint8_t tail[] = {0, 0, 0, 0, 0, 0};
 
-    return (memcmp(d + 25, p, 6) == 0);
-}
+    uint8_t polarity;
+    uint8_t* data = chan->nav_buf;
 
-uint8_t process_message(e1b_channel_t *chan)
-{
-    uint8_t preamble_norm[] = {1, 0, 0, 0, 1, 0, 1, 1};
-    uint8_t preamble_inv[] = {0, 1, 1, 1, 0, 1, 0, 0};
-    uint8_t p[6];
-
-    if (memcmp(chan->nav_buf, preamble_norm, 8) == 0)
-        p[4] = p[5] = 0;
-    else if (memcmp(chan->nav_buf, preamble_inv, 8) == 0)
-        p[4] = p[5] = 1;
-    else
+    // Check sync word
+    if (memcmp(data, sync_word, sizeof(sync_word)) == 0) {
+        polarity = 0;
+    } else if (memcmp(data, inv_sync_word, sizeof(inv_sync_word)) == 0) {
+        polarity = 1;
+    } else {
         return 0;
+    }
 
-    // Check 10 word parities
-    for (uint8_t i = 0; i < 10; i++)
-    {
-        if (!check_parity(chan->nav_buf + i * 30, p, p[4], p[5]))
-        {
-            chan->wait_frames = 2;
-            return 0;
+    // Deinterleave
+    data += sizeof(sync_word);
+    uint8_t block[240];
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 30; j++) {
+        block[i + j * 8] = data[i * 30 + j] ^ polarity;
         }
     }
 
-    // Verify HOW subframe ID
-    uint8_t subframe_id = (chan->nav_buf[29 + 20] << 2) | (chan->nav_buf[29 + 21] << 1) | chan->nav_buf[29 + 22];
-    if (subframe_id < 1 || subframe_id > 5)
-    {
-        chan->wait_frames = 2;
+    // Decode convolutional code
+    uint8_t decoded_bits[sizeof(block) / 2];
+    viterbi_decode(block, decoded_bits);
+
+    // Check tail
+    if (memcmp(decoded_bits + (sizeof(decoded_bits) - sizeof(tail)), tail,
+                sizeof(tail))) {
         return 0;
     }
 
-    // Final verification is the Z count incrementing by 1
-    int32_t this_z_count = 0;
-    for (uint8_t i = 30; i < 30 + 17; i++)
-    {
-        this_z_count = (this_z_count << 1) | chan->nav_buf[i];
+    //for (int i = 0; i < 15; i++) {
+    //    for (int j = 0; j < 8; j++) {
+    //    printf("%d ", decoded_bits[i * 8 + j]);
+    //    }
+    //    printf("\n");
+    //}
+
+    // Ignore alert page
+    if(decoded_bits[1] == 0x1) {
+        return 0;
     }
-    if ((chan->last_z_count + 1) % 100800 == this_z_count)
-    {
-        chan->nav_valid = 1;
+
+    // Confirm page type is within range
+    chan->last_page_half = decoded_bits[0];
+    uint8_t page_type = 0;
+    printf("Page half: %d\n", chan->last_page_half);
+    if(chan->last_page_half == 0) {
+        for(int i = 0; i < 6; i++) {
+            page_type |= decoded_bits[i + 2] << (5-i);
+        }
+        printf("Page type: %d\n", page_type);
+    } else {
+        chan->last_t0 = (chan->last_t0 + 1) % 30;
+        printf("t0 = %d\n", chan->last_t0);
+        return 0;
     }
-    else
-    {
-        chan->nav_valid = 0;
+    // Only pages 0-10, 16-20 are acceptable
+    if(chan->last_page_type > 20 || (chan->last_page_type > 10 && chan->last_page_type < 16)) {
+        chan->last_page_type = page_type;
+        return 0;
     }
-    chan->last_z_count = this_z_count;
-    if (chan->wait_frames)
-        chan->wait_frames--;
+
+    // Determine T0 (at this point is only even pages, AKA start of page)
+    const uint8_t page_map[] = {0, 21, 1, 23, 3, 25, 5, 7, 9, 7, 9, 0, 0, 0, 0, 0, 29, 11, 11, 13, 13};
+    if(page_type == 0) {
+        if(chan->last_page_type == 16) {
+            chan->last_t0 = 17;
+        } else if(chan->last_page_type == 0) {
+            chan->last_t0 = 19;
+        } else if(chan->last_page_type == 5) {
+            chan->last_t0 = 27;
+        }
+    } else {
+        chan->last_t0 = page_map[page_type];
+    }
+
+    printf("t0 = %d\n", chan->last_t0);
+
+    chan->last_page_type = page_type;
 
     return 1;
 }
 
-void clock_channel(e1b_channel_t *chan, uint8_t sample)
+void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample)
 {
     uint8_t ca_full = (chan->ca_phase >> 31) & 0x1;
     uint8_t last_ca_full = ca_full;
+    static double last_ca_phase = 0;
     if (chan->ca_en)
     {
         chan->ca_phase += chan->ca_rate;
@@ -269,35 +371,40 @@ void clock_channel(e1b_channel_t *chan, uint8_t sample)
 
     if (ca_full & !last_ca_full)
     {
-        clock_ca(&chan->ca);
+        e1b_clock_ca(&chan->ca);
     }
 
-    chan->ca_e = get_ca(&chan->ca);
-    if (ca_full && !ca_half)
-    {
+    chan->ca_e = e1b_get_ca(&chan->ca);
+    if(((double)chan->ca_phase / pow(2, 32)) >= fmod(0.25 + last_ca_phase, 1.0)) {
         chan->ca_l = chan->ca_p;
-    }
-    else if (!ca_full && !ca_half)
-    {
         chan->ca_p = chan->ca_e;
+        last_ca_phase = (double)chan->ca_phase / pow(2, 32);
     }
+    //if (ca_full && !ca_half)
+    //{
+    //    chan->ca_l = chan->ca_p;
+    //}
+    //else if (!ca_full && !ca_half)
+    //{
+    //    chan->ca_p = chan->ca_e;
+    //}
 
-    do_sample(chan, sample);
+    e1b_do_sample(chan, sample);
 
-    if (is_ca_epoch(&chan->ca) && !chan->tracked_this_epoch)
+    if (e1b_is_ca_epoch(&chan->ca) && !chan->tracked_this_epoch)
     {
         int64_t power_early = chan->ie * chan->ie + chan->qe * chan->qe;
         int64_t power_late = chan->il * chan->il + chan->ql * chan->ql;
         int64_t code_phase_err = power_early - power_late;
 
         chan->ca_freq_integrator += code_phase_err << 10;
-        int64_t new_ca_rate = chan->ca_freq_integrator + (code_phase_err << 20);
+        int64_t new_ca_rate = chan->ca_freq_integrator + (code_phase_err << 19);
         chan->ca_rate = new_ca_rate >> 32;
 
         int64_t carrier_phase_err = chan->ip * chan->qp;
 
-        chan->lo_freq_integrator += carrier_phase_err << 19;
-        int64_t new_lo_rate = chan->lo_freq_integrator + (carrier_phase_err << 24);
+        chan->lo_freq_integrator += carrier_phase_err << 15;
+        int64_t new_lo_rate = chan->lo_freq_integrator + (carrier_phase_err << 19);
         chan->lo_rate = new_lo_rate >> 32;
 
         // printf("carrier doppler from code lock: %lld\n",  (ca_freq_integrator >> 32));
@@ -305,40 +412,46 @@ void clock_channel(e1b_channel_t *chan, uint8_t sample)
         // printf("carrier doppler from carrier lock: %20f\n",  ((lo_freq_integrator/4294967296.0)*fs/(4294967296.0))-fc);
         // printf("carrier doppler from carrier lock: %llu\n", lo_freq_integrator);
 
-        // if (chan->total_ms == 300)
-        //{
-        //     // Plotting
-        //     FILE *gnuplot_file = fopen("temp.dat", "w");
-        //
-        //    FILE *gnuplot = _popen("gnuplot -persist", "w");
-        //
-        //    for (int i = 0; i < save_idx[chan->sv]; i++)
-        //    {
-        //        fprintf(gnuplot_file, "%g %g %g\n", clock_save[i][chan->sv], (double)ip_save[i][chan->sv], (double)nav_ms_save[i][chan->sv]);
-        //    }
-        //    fclose(gnuplot_file);
-        //
-        //    fprintf(gnuplot, "set title 'SV: %d'\n", chan->sv + 1);
-        //    fprintf(gnuplot, "set yrange [-2000:2000]\n");
-        //    fprintf(gnuplot, "set y2range [0:20]\n");
-        //    fprintf(gnuplot, "set ytics\n");
-        //    fprintf(gnuplot, "set y2tics\n");
-        //    fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'I' axes x1y1 with lines, \\\n"
-        //                     "'temp.dat' using 1:3 title 'ms' axes x1y2 with points\n");
-        //
-        //    _pclose(gnuplot);
-        //}
-        // printf("Subframe ID: %d\n", subframe_id);
+         if (chan->total_ms == 300*4)
+        {
+             // Plotting
+             FILE *gnuplot_file = fopen("temp.dat", "w");
+        
+            FILE *gnuplot = _popen("gnuplot -persist", "w");
+        
+            //for (int i = 0; i < e1b_save_idx[chan->sv]; i++)
+            //{
+            //    fprintf(gnuplot_file, "%g %g %g\n", e1b_clock_save[i][chan->sv], (double)e1b_ip_save[i][chan->sv], (double)e1b_nav_ms_save[i][chan->sv]);
+            //}
+            for (int i = 20; i < e1b_save_idx[chan->sv]; i++)
+            {
+                fprintf(gnuplot_file, "%g %g\n", (double)e1b_ip_save[i][chan->sv], (double)e1b_qp_save[i][chan->sv]);
+            }
+            fclose(gnuplot_file);
+        
+            fprintf(gnuplot, "set title 'SV: %d'\n", chan->sv + 1);
+            fprintf(gnuplot, "set xrange [-6000:6000]\n");
+            fprintf(gnuplot, "set yrange [-6000:6000]\n");
+            //fprintf(gnuplot, "set y2range [0:20]\n");
+            fprintf(gnuplot, "set ytics\n");
+            //fprintf(gnuplot, "set y2tics\n");
+            fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'IQ' axes x1y1 with points\n");
+            //fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'I' axes x1y1 with lines, \\\n"
+            //                 "'temp.dat' using 1:3 title 'ms' axes x1y2 with points\n");
+        
+            _pclose(gnuplot);
+        }
+         //printf("Subframe ID: %d\n", subframe_id);
 
         // Process nav bits
-        process_ip_to_bit(chan);
-        if (chan->nav_bit_count >= 300)
+        e1b_process_ip_to_bit(chan);
+        if (chan->nav_bit_count >= 250)
         {
-            if (process_message(chan))
+            if (e1b_process_message(chan))
             {
-                printf("SV: %d found message at %d ms!\n", chan->sv + 1, chan->total_ms);
-                save_ephemeris_data(chan->nav_buf, &chan->ephm);
-                memmove(chan->nav_buf, chan->nav_buf + 300, chan->nav_bit_count -= 300);
+                printf("SV: %d found page %d at %d ms!\n", chan->sv + 1, chan->last_page_type, chan->total_ms);
+                //save_ephemeris_data(chan->nav_buf, &chan->ephm);
+                memmove(chan->nav_buf, chan->nav_buf + 250, chan->nav_bit_count -= 250);
             }
             else
             {
@@ -354,8 +467,23 @@ void clock_channel(e1b_channel_t *chan, uint8_t sample)
         chan->ql = 0;
         chan->tracked_this_epoch = 1;
     }
-    else if (!is_ca_epoch(&chan->ca))
+    else if (!e1b_is_ca_epoch(&chan->ca))
     {
         chan->tracked_this_epoch = 0;
     }
+}
+
+double e1b_get_tx_time(e1b_channel_t *chan)
+{
+    uint32_t chips = chan->ca.chip;
+
+    double t = chan->last_t0 + 
+               chan->nav_bit_count / 250.0 +
+               chips / 1023000.0 +
+               (chan->ca_phase + (1U << 31)) * pow(2, -32) / 1023000.0;
+
+    // if (chan->sv + 1 == 29)
+    //     printf("%d,%u,%u,%u,%lu,%.10f\n", chan->last_z_count, chan->nav_bit_count, chan->nav_ms, chips, chan->ca_phase, t);
+
+    return t;
 }

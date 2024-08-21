@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "e1b_channel.h": "c",
+        "ephemeris.h": "c"
+    }
+}
