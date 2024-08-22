@@ -7,7 +7,8 @@
 #define F -4.442807633e-10
 #define E_K_ITER 20
 
-typedef struct {
+typedef struct
+{
     // Subframe 1
     uint8_t ura;
     uint8_t sv_health;
@@ -46,10 +47,10 @@ typedef struct {
     int8_t beta_3;
 } ephemeris_t;
 
-#endif
-
 void save_ephemeris_data(uint8_t *buf, ephemeris_t *ephm);
 
 void get_satellite_ecef(ephemeris_t *ephm, double t, double *x, double *y, double *z);
 
 double get_clock_correction(ephemeris_t *ephm, double t);
+
+#endif

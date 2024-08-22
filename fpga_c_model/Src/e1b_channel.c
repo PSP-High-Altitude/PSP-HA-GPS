@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "waves.h"
+#include "tools.h"
 
 double e1b_clock_save[1000][32];
 uint8_t e1b_nav_ms_save[1000][32];
@@ -66,93 +67,105 @@ const uint8_t e1_code[50][512] = {
     {0x97, 0x05, 0x1F, 0xC6, 0x7A, 0xCA, 0x30, 0xE8, 0xAE, 0xE7, 0x3D, 0x3A, 0x8C, 0xF3, 0x8B, 0xB1, 0x35, 0x24, 0xD4, 0xE0, 0xEB, 0xD9, 0xBE, 0x68, 0x39, 0x8C, 0x7C, 0x16, 0x22, 0x7C, 0xAB, 0xB1, 0xD0, 0xB0, 0xA0, 0xAB, 0xE7, 0xB6, 0x38, 0x4A, 0xBA, 0x02, 0x90, 0x5B, 0xA0, 0xC3, 0xC7, 0x36, 0x35, 0x99, 0xD0, 0x59, 0xC7, 0xB4, 0xC9, 0x9D, 0xB1, 0x65, 0xCD, 0x14, 0xFA, 0x12, 0xFA, 0x79, 0x12, 0x44, 0x9C, 0xA7, 0xDD, 0x5E, 0x34, 0x6D, 0x80, 0x10, 0xC8, 0x5A, 0x75, 0x73, 0x82, 0x27, 0x0D, 0xAD, 0x15, 0xBA, 0x3C, 0xE3, 0x6A, 0x76, 0xEF, 0x55, 0xF8, 0x1A, 0x1E, 0x80, 0xBF, 0x36, 0x6B, 0x37, 0xFE, 0x3A, 0x88, 0xEC, 0x72, 0x20, 0x28, 0xC2, 0x5E, 0x23, 0x4E, 0x62, 0x40, 0x40, 0x45, 0x0A, 0x99, 0xCD, 0x80, 0x8F, 0x94, 0x25, 0x68, 0xAA, 0x71, 0x33, 0x98, 0x1D, 0x72, 0xE7, 0xF2, 0x92, 0x88, 0x94, 0x67, 0x0A, 0xD5, 0x39, 0x94, 0x82, 0xDF, 0x1B, 0x90, 0xE7, 0xE6, 0x40, 0x62, 0xF8, 0x30, 0xB7, 0x36, 0xC7, 0x9C, 0x30, 0xF3, 0x62, 0x81, 0x49, 0x5C, 0x76, 0x69, 0x9C, 0xD4, 0x84, 0x04, 0x67, 0x3F, 0xA3, 0x34, 0xF0, 0x42, 0xF9, 0xE0, 0xE6, 0x7D, 0xD7, 0xF3, 0x85, 0x3B, 0xF7, 0x1A, 0xBE, 0xAF, 0x6A, 0x9A, 0x55, 0x46, 0x85, 0x5E, 0x84, 0x0C, 0xE4, 0x2B, 0x22, 0x4D, 0x8F, 0x64, 0x90, 0xC6, 0xCE, 0x5F, 0xC0, 0x2E, 0xBA, 0xF4, 0xFF, 0xC3, 0x90, 0x10, 0x70, 0x58, 0xF5, 0x4C, 0xD6, 0x35, 0xD4, 0xA7, 0xF2, 0x87, 0x80, 0x99, 0xC1, 0xEF, 0x49, 0x57, 0x50, 0xE6, 0x92, 0x1B, 0xE2, 0xF3, 0x9A, 0xD8, 0x08, 0xC4, 0x21, 0x0F, 0x28, 0x73, 0x19, 0xF8, 0x11, 0xA2, 0x54, 0xCE, 0xF8, 0xCF, 0x15, 0x3F, 0xC5, 0x0A, 0xB2, 0xF3, 0xD6, 0x94, 0xA5, 0x30, 0x94, 0x9E, 0x5F, 0x57, 0x8D, 0x07, 0x5D, 0xB9, 0x6D, 0xDC, 0xF2, 0xBB, 0x90, 0xED, 0x3D, 0xE0, 0x9D, 0x9C, 0xA8, 0xE0, 0x86, 0x62, 0xFD, 0x89, 0x82, 0x74, 0x1D, 0xE1, 0xCE, 0x0A, 0x6B, 0x64, 0xC3, 0xD3, 0xD5, 0x00, 0x4B, 0x5C, 0x04, 0xB2, 0xB0, 0xDF, 0xD9, 0x76, 0xA2, 0x0F, 0xAC, 0xC9, 0x4D, 0x17, 0x62, 0xD4, 0x1E, 0xE0, 0x3B, 0x40, 0xD2, 0xCF, 0x36, 0x76, 0x12, 0x81, 0x2E, 0xF4, 0xCC, 0x41, 0xD1, 0xBF, 0xE9, 0xCE, 0xB5, 0x1A, 0xE3, 0xA2, 0x2A, 0xF1, 0xBE, 0x7B, 0x85, 0xA0, 0x57, 0xD3, 0x04, 0x8D, 0x0E, 0x73, 0xFA, 0x0F, 0xDA, 0xF1, 0x11, 0x9E, 0xFD, 0x76, 0xF0, 0xA4, 0x1B, 0xE6, 0x31, 0x28, 0xB2, 0x2D, 0x64, 0xA5, 0x55, 0x3E, 0x95, 0x49, 0xD4, 0x11, 0x48, 0x3B, 0xBC, 0xA1, 0x48, 0x3E, 0xF3, 0x0C, 0xF6, 0xA6, 0xD3, 0x17, 0xAD, 0x2C, 0x79, 0x73, 0xEF, 0xA6, 0xD4, 0xC1, 0x12, 0x1F, 0x70, 0x3D, 0x2F, 0x48, 0xFC, 0xDA, 0x31, 0x77, 0xAD, 0x45, 0x0D, 0x75, 0xD2, 0xA2, 0x8D, 0x2C, 0x24, 0x4A, 0xEA, 0x13, 0xF0, 0xE6, 0x0A, 0xEE, 0xD8, 0xAC, 0xBA, 0xB4, 0x44, 0xD4, 0x00, 0xDF, 0x5E, 0x28, 0x0D, 0xB7, 0x99, 0xB2, 0xD9, 0xA9, 0x84, 0xDF, 0x1E, 0x25, 0x67, 0xD3, 0x9D, 0x1D, 0xE5, 0x8E, 0xF7, 0x8C, 0xA6, 0xB4, 0xD8, 0xBC, 0x17, 0x2B, 0x07, 0xDC, 0xB0, 0x2D, 0x15, 0x6C, 0xA9, 0x6E, 0xEF, 0xAC, 0x69, 0xE5, 0x56, 0xCF, 0xCE, 0x0A, 0xAB, 0x61, 0x7C, 0x7F, 0xBB, 0x8C, 0x34, 0x87, 0x1C, 0x1D, 0x35, 0xE7, 0x4B, 0x7B, 0xD3, 0x07, 0xD3, 0xF2, 0xE4, 0x24, 0xC7, 0xA9, 0xAD, 0x67, 0x6A, 0x1A, 0x69, 0xE0, 0xFE, 0x73, 0x5E, 0xA5, 0x08, 0x87, 0xA1, 0xDF, 0xAE, 0x6C, 0xA2, 0xFE, 0x44, 0x60, 0xFC, 0x7E, 0xF3, 0x23, 0xAD, 0xE4, 0x93, 0x02, 0x00},
 };
 
-uint32_t hamming_dist2(uint32_t val1, uint32_t val2) {
-  uint32_t dist = 0;
-  for (int i = 0; i < 2; i++) {
-    dist += (val1 & 0x1) ^ (val2 & 0x1);
-    val1 >>= 1;
-    val2 >>= 1;
-  }
-  return dist;
+uint32_t hamming_dist2(uint32_t val1, uint32_t val2)
+{
+    uint32_t dist = 0;
+    for (int i = 0; i < 2; i++)
+    {
+        dist += (val1 & 0x1) ^ (val2 & 0x1);
+        val1 >>= 1;
+        val2 >>= 1;
+    }
+    return dist;
 }
 
-uint8_t get_conv_out(uint8_t state, uint8_t input) {
-  static uint8_t G1 = 0b1111001;
-  static uint8_t G2 = 0b1011011;
+uint8_t get_conv_out(uint8_t state, uint8_t input)
+{
+    static uint8_t G1 = 0b1111001;
+    static uint8_t G2 = 0b1011011;
 
-  uint8_t conv_in = state | (input << 6);
+    uint8_t conv_in = state | (input << 6);
 
-  // [7:2] res, [1:0] output bits
-  uint8_t result = 0;
-  result |= (__builtin_parity(conv_in & G1) << 1);
-  result |= (__builtin_parity(conv_in & G2) == 0);
+    // [7:2] res, [1:0] output bits
+    uint8_t result = 0;
+    result |= (__builtin_parity(conv_in & G1) << 1);
+    result |= (__builtin_parity(conv_in & G2) == 0);
 
-  return result;
+    return result;
 }
 
-void viterbi_decode(uint8_t *data, uint8_t *result) {
-  static const uint8_t nstates = 64;
-  static const uint8_t ninput = 240;
-  static const uint8_t rate = 2;
+void viterbi_decode(uint8_t *data, uint8_t *result)
+{
+    static const uint8_t nstates = 64;
+    static const uint8_t ninput = 240;
+    static const uint8_t rate = 2;
 
-  uint32_t path_metric[nstates][ninput / rate + 1];
+    uint32_t path_metric[nstates][ninput / rate + 1];
 
-  // Setup initial state
-  memset(path_metric, 0xFF, sizeof(path_metric));
-  path_metric[0][0] = 0;
+    // Setup initial state
+    memset(path_metric, 0xFF, sizeof(path_metric));
+    path_metric[0][0] = 0;
 
-  // Create trellis
-  for (int j = 0; j < ninput / rate; j++) {
+    // Create trellis
+    for (int j = 0; j < ninput / rate; j++)
+    {
 
-    for (uint8_t i = 0; i < nstates; i++) {
-      // skip unaccessible states
-      if (path_metric[i][j] == 0xFFFFFFFF)
-        continue;
+        for (uint8_t i = 0; i < nstates; i++)
+        {
+            // skip unaccessible states
+            if (path_metric[i][j] == 0xFFFFFFFF)
+                continue;
 
-      // input bit 0
-      uint8_t next_state = (i >> 1);
-      uint32_t conv_out = get_conv_out(i, 0);
-      uint8_t rcvd = (data[j * rate] << 1) | data[j * rate + 1];
-      uint32_t dist = hamming_dist2(rcvd, conv_out);
-      if (path_metric[next_state][j + 1] > path_metric[i][j] + dist) {
-        path_metric[next_state][j + 1] = path_metric[i][j] + dist;
-      }
-      // input bit 1
-      next_state |= 0b100000;
-      conv_out = get_conv_out(i, 1);
-      dist = hamming_dist2(rcvd, conv_out);
-      if (path_metric[next_state][j + 1] > path_metric[i][j] + dist) {
-        path_metric[next_state][j + 1] = path_metric[i][j] + dist;
-      }
+            // input bit 0
+            uint8_t next_state = (i >> 1);
+            uint32_t conv_out = get_conv_out(i, 0);
+            uint8_t rcvd = (data[j * rate] << 1) | data[j * rate + 1];
+            uint32_t dist = hamming_dist2(rcvd, conv_out);
+            if (path_metric[next_state][j + 1] > path_metric[i][j] + dist)
+            {
+                path_metric[next_state][j + 1] = path_metric[i][j] + dist;
+            }
+            // input bit 1
+            next_state |= 0b100000;
+            conv_out = get_conv_out(i, 1);
+            dist = hamming_dist2(rcvd, conv_out);
+            if (path_metric[next_state][j + 1] > path_metric[i][j] + dist)
+            {
+                path_metric[next_state][j + 1] = path_metric[i][j] + dist;
+            }
+        }
     }
-  }
 
-  // Find best ending
-  uint8_t best_state = 0;
-  uint32_t best_metric = 0xFFFFFFFF;
-  for (int i = 0; i < nstates; i++) {
-    if (path_metric[i][ninput / rate] < best_metric) {
-      best_metric = path_metric[i][ninput / rate];
-      best_state = i;
+    // Find best ending
+    uint8_t best_state = 0;
+    uint32_t best_metric = 0xFFFFFFFF;
+    for (int i = 0; i < nstates; i++)
+    {
+        if (path_metric[i][ninput / rate] < best_metric)
+        {
+            best_metric = path_metric[i][ninput / rate];
+            best_state = i;
+        }
     }
-  }
 
-  // Traceback through best path
-  for (int i = ninput / rate - 1; i >= 0; i--) {
-    result[i] = (best_state >> 5) & 1;
+    // Traceback through best path
+    for (int i = ninput / rate - 1; i >= 0; i--)
+    {
+        result[i] = (best_state >> 5) & 1;
 
-    // Zero path
-    uint8_t previous_state = (best_state << 1) & 0b111111;
-    best_metric = path_metric[previous_state][i];
-    best_state = previous_state;
+        // Zero path
+        uint8_t previous_state = (best_state << 1) & 0b111111;
+        best_metric = path_metric[previous_state][i];
+        best_state = previous_state;
 
-    // One path
-    previous_state = (best_state | 1);
-    if (path_metric[previous_state][i] < best_metric) {
-      best_metric = path_metric[previous_state][i];
-      best_state = previous_state;
+        // One path
+        previous_state = (best_state | 1);
+        if (path_metric[previous_state][i] < best_metric)
+        {
+            best_metric = path_metric[previous_state][i];
+            best_state = previous_state;
+        }
     }
-  }
 }
 
 void e1b_clock_ca(e1b_ca_t *ca)
@@ -203,12 +216,13 @@ void e1b_init_channel(e1b_channel_t *chan, int chan_num, int sv, double lo_dop, 
     chan->last_page_type = 0;
     chan->last_bit = 2;
     chan->last_t0 = 0;
-    memset(&chan->ephm, 0, sizeof(ephemeris_t));
+    chan->page_parts = 0;
+    memset(&chan->ephm, 0, sizeof(e1b_ephemeris_t));
 }
 
 void e1b_do_sample(e1b_channel_t *chan, uint8_t sample)
 {
-    if(!chan->ca_en) 
+    if (!chan->ca_en)
         return;
     uint8_t lo_i = lo_sin[chan->lo_phase >> 30];
     uint8_t lo_q = lo_cos[chan->lo_phase >> 30];
@@ -238,11 +252,12 @@ void e1b_do_sample(e1b_channel_t *chan, uint8_t sample)
 
 void e1b_process_ip_to_bit(e1b_channel_t *chan)
 {
-    if (e1b_save_idx[chan->sv] < 300) {
+    if (e1b_save_idx[chan->sv] < 300)
+    {
         e1b_clock_save[e1b_save_idx[chan->sv]][chan->sv] = clock / fs;
         e1b_ip_save[e1b_save_idx[chan->sv]][chan->sv] = chan->ip;
         e1b_qp_save[e1b_save_idx[chan->sv]++][chan->sv] = chan->qp;
-        //e1b_nav_ms_save[e1b_save_idx[chan->sv]++][chan->sv] = chan->nav_ms;
+        // e1b_nav_ms_save[e1b_save_idx[chan->sv]++][chan->sv] = chan->nav_ms;
     }
 
     uint8_t bit = (chan->ip > 0) ? 1 : 0;
@@ -252,7 +267,7 @@ void e1b_process_ip_to_bit(e1b_channel_t *chan)
     }
     chan->last_bit = bit;
     chan->nav_ms = 0;
-    chan->total_ms+=4;
+    chan->total_ms += 4;
 
     // printf("SV: %d\n\tBit: %d\n\tms: %d\n", chan->sv + 1, chan->last_bit, chan->nav_ms);
 }
@@ -264,23 +279,30 @@ uint8_t e1b_process_message(e1b_channel_t *chan)
     static const uint8_t tail[] = {0, 0, 0, 0, 0, 0};
 
     uint8_t polarity;
-    uint8_t* data = chan->nav_buf;
+    uint8_t *data = chan->nav_buf;
 
     // Check sync word
-    if (memcmp(data, sync_word, sizeof(sync_word)) == 0) {
+    if (memcmp(data, sync_word, sizeof(sync_word)) == 0)
+    {
         polarity = 0;
-    } else if (memcmp(data, inv_sync_word, sizeof(inv_sync_word)) == 0) {
+    }
+    else if (memcmp(data, inv_sync_word, sizeof(inv_sync_word)) == 0)
+    {
         polarity = 1;
-    } else {
+    }
+    else
+    {
         return 0;
     }
 
     // Deinterleave
     data += sizeof(sync_word);
     uint8_t block[240];
-    for (int i = 0; i < 8; i++) {
-        for (int j = 0; j < 30; j++) {
-        block[i + j * 8] = data[i * 30 + j] ^ polarity;
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 30; j++)
+        {
+            block[i + j * 8] = data[i * 30 + j] ^ polarity;
         }
     }
 
@@ -290,53 +312,68 @@ uint8_t e1b_process_message(e1b_channel_t *chan)
 
     // Check tail
     if (memcmp(decoded_bits + (sizeof(decoded_bits) - sizeof(tail)), tail,
-                sizeof(tail))) {
+               sizeof(tail)))
+    {
         return 0;
     }
 
-    //for (int i = 0; i < 15; i++) {
-    //    for (int j = 0; j < 8; j++) {
-    //    printf("%d ", decoded_bits[i * 8 + j]);
-    //    }
-    //    printf("\n");
-    //}
+    // for (int i = 0; i < 15; i++) {
+    //     for (int j = 0; j < 8; j++) {
+    //     printf("%d ", decoded_bits[i * 8 + j]);
+    //     }
+    //     printf("\n");
+    // }
+
+    // New page part
+    chan->last_t0 = (chan->last_t0 + 1) % 30;
 
     // Ignore alert page
-    if(decoded_bits[1] == 0x1) {
-        return 0;
+    if (decoded_bits[1] == 0x1)
+    {
+        return 1;
     }
+
+    printf("\n");
 
     // Confirm page type is within range
     chan->last_page_half = decoded_bits[0];
     uint8_t page_type = 0;
     printf("Page half: %d\n", chan->last_page_half);
-    if(chan->last_page_half == 0) {
-        for(int i = 0; i < 6; i++) {
-            page_type |= decoded_bits[i + 2] << (5-i);
+    if (chan->last_page_half == 0)
+    {
+        chan->page_parts = 1;
+        memcpy(chan->data, decoded_bits + 2, 112); // Copy data
+        for (int i = 0; i < 6; i++)
+        {
+            page_type |= decoded_bits[i + 2] << (5 - i);
         }
         printf("Page type: %d\n", page_type);
-    } else {
-        chan->last_t0 = (chan->last_t0 + 1) % 30;
-        printf("t0 = %d\n", chan->last_t0);
-        return 0;
     }
+    else
+    {
+        // Second half
+        if (chan->page_parts)
+        {
+            memcpy(chan->data + 112, decoded_bits + 2, 16); // Copy data
+            memcpy(chan->crc, decoded_bits + 82, 24);       // Copy CRC
+            // Save navigation information
+            e1b_save_ephemeris_data(chan);
+        }
+        return 1;
+    }
+
     // Only pages 0-10, 16-20 are acceptable
-    if(chan->last_page_type > 20 || (chan->last_page_type > 10 && chan->last_page_type < 16)) {
+    if (chan->last_page_type > 20 || (chan->last_page_type > 10 && chan->last_page_type < 16))
+    {
         chan->last_page_type = page_type;
-        return 0;
+        chan->page_parts = 0; // We don't have the start of a valid page
+        return 1;
     }
 
     // Determine T0 (at this point is only even pages, AKA start of page)
     const uint8_t page_map[] = {0, 21, 1, 23, 3, 25, 5, 7, 9, 7, 9, 0, 0, 0, 0, 0, 29, 11, 11, 13, 13};
-    if(page_type == 0) {
-        if(chan->last_page_type == 16) {
-            chan->last_t0 = 17;
-        } else if(chan->last_page_type == 0) {
-            chan->last_t0 = 19;
-        } else if(chan->last_page_type == 5) {
-            chan->last_t0 = 27;
-        }
-    } else {
+    if (page_type != 0) // Ignore 0 pages for purpose of t0 synchronization
+    {
         chan->last_t0 = page_map[page_type];
     }
 
@@ -375,19 +412,20 @@ void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample)
     }
 
     chan->ca_e = e1b_get_ca(&chan->ca);
-    if(((double)chan->ca_phase / pow(2, 32)) >= fmod(0.25 + last_ca_phase, 1.0)) {
+    if (((double)chan->ca_phase / pow(2, 32)) >= fmod(0.25 + last_ca_phase, 1.0))
+    {
         chan->ca_l = chan->ca_p;
         chan->ca_p = chan->ca_e;
         last_ca_phase = (double)chan->ca_phase / pow(2, 32);
     }
-    //if (ca_full && !ca_half)
+    // if (ca_full && !ca_half)
     //{
-    //    chan->ca_l = chan->ca_p;
-    //}
-    //else if (!ca_full && !ca_half)
+    //     chan->ca_l = chan->ca_p;
+    // }
+    // else if (!ca_full && !ca_half)
     //{
-    //    chan->ca_p = chan->ca_e;
-    //}
+    //     chan->ca_p = chan->ca_e;
+    // }
 
     e1b_do_sample(chan, sample);
 
@@ -412,36 +450,36 @@ void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample)
         // printf("carrier doppler from carrier lock: %20f\n",  ((lo_freq_integrator/4294967296.0)*fs/(4294967296.0))-fc);
         // printf("carrier doppler from carrier lock: %llu\n", lo_freq_integrator);
 
-         if (chan->total_ms == 300*4)
+        if (chan->total_ms == 300 * 4)
         {
-             // Plotting
-             FILE *gnuplot_file = fopen("temp.dat", "w");
-        
+            // Plotting
+            FILE *gnuplot_file = fopen("temp.dat", "w");
+
             FILE *gnuplot = _popen("gnuplot -persist", "w");
-        
-            //for (int i = 0; i < e1b_save_idx[chan->sv]; i++)
+
+            // for (int i = 0; i < e1b_save_idx[chan->sv]; i++)
             //{
-            //    fprintf(gnuplot_file, "%g %g %g\n", e1b_clock_save[i][chan->sv], (double)e1b_ip_save[i][chan->sv], (double)e1b_nav_ms_save[i][chan->sv]);
-            //}
+            //     fprintf(gnuplot_file, "%g %g %g\n", e1b_clock_save[i][chan->sv], (double)e1b_ip_save[i][chan->sv], (double)e1b_nav_ms_save[i][chan->sv]);
+            // }
             for (int i = 20; i < e1b_save_idx[chan->sv]; i++)
             {
                 fprintf(gnuplot_file, "%g %g\n", (double)e1b_ip_save[i][chan->sv], (double)e1b_qp_save[i][chan->sv]);
             }
             fclose(gnuplot_file);
-        
+
             fprintf(gnuplot, "set title 'SV: %d'\n", chan->sv + 1);
             fprintf(gnuplot, "set xrange [-6000:6000]\n");
             fprintf(gnuplot, "set yrange [-6000:6000]\n");
-            //fprintf(gnuplot, "set y2range [0:20]\n");
+            // fprintf(gnuplot, "set y2range [0:20]\n");
             fprintf(gnuplot, "set ytics\n");
-            //fprintf(gnuplot, "set y2tics\n");
+            // fprintf(gnuplot, "set y2tics\n");
             fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'IQ' axes x1y1 with points\n");
-            //fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'I' axes x1y1 with lines, \\\n"
-            //                 "'temp.dat' using 1:3 title 'ms' axes x1y2 with points\n");
-        
+            // fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'I' axes x1y1 with lines, \\\n"
+            //                  "'temp.dat' using 1:3 title 'ms' axes x1y2 with points\n");
+
             _pclose(gnuplot);
         }
-         //printf("Subframe ID: %d\n", subframe_id);
+        // printf("Subframe ID: %d\n", subframe_id);
 
         // Process nav bits
         e1b_process_ip_to_bit(chan);
@@ -450,7 +488,6 @@ void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample)
             if (e1b_process_message(chan))
             {
                 printf("SV: %d found page %d at %d ms!\n", chan->sv + 1, chan->last_page_type, chan->total_ms);
-                //save_ephemeris_data(chan->nav_buf, &chan->ephm);
                 memmove(chan->nav_buf, chan->nav_buf + 250, chan->nav_bit_count -= 250);
             }
             else
@@ -477,7 +514,7 @@ double e1b_get_tx_time(e1b_channel_t *chan)
 {
     uint32_t chips = chan->ca.chip;
 
-    double t = chan->last_t0 + 
+    double t = chan->last_t0 +
                chan->nav_bit_count / 250.0 +
                chips / 1023000.0 +
                (chan->ca_phase + (1U << 31)) * pow(2, -32) / 1023000.0;

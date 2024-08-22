@@ -1,5 +1,5 @@
-#ifndef EPHEMERIS_H
-#define EPHEMERIS_H
+#ifndef E1B_EPHEMERIS_H
+#define E1B_EPHEMERIS_H
 
 #include "stdint.h"
 #define mu 3.986005e14
@@ -7,7 +7,12 @@
 #define F -4.442807633e-10
 #define E_K_ITER 20
 
-typedef struct {
+typedef struct
+{
+    // Page 0 - WN and TOW
+    uint16_t wn;
+    uint32_t tow;
+
     // Subframe 1
     uint8_t ura;
     uint8_t sv_health;
@@ -46,10 +51,8 @@ typedef struct {
     int8_t beta_3;
 } e1b_ephemeris_t;
 
-#endif
-
-void e1b_save_ephemeris_data(uint8_t *buf, e1b_ephemeris_t *ephm);
-
 void e1b_get_satellite_ecef(e1b_ephemeris_t *ephm, double t, double *x, double *y, double *z);
 
 double e1b_get_clock_correction(e1b_ephemeris_t *ephm, double t);
+
+#endif

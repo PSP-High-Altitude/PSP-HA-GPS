@@ -1,86 +1,103 @@
-#include "e1b_ephemeris.h"
+#include "e1b_channel.h"
 #include "gps.h"
 #include "string.h"
 #include "stdio.h"
 #include "math.h"
 #include "tools.h"
 
-void e1b_save_ephemeris_data(uint8_t *buf, e1b_ephemeris_t *ephm)
+void e1b_save_ephemeris_data(e1b_channel_t *chan)
 {
-    uint8_t subframe_id;
-    bytes_to_number(&subframe_id, buf + 49, 8, 3, 0);
-    if (subframe_id == 0x1)
+    e1b_ephemeris_t *ephm = &chan->ephm;
+    // for (int i = 0; i < 128; i++)
+    //{
+    //     printf("%d", chan->data[i]);
+    //     if (i % 8 == 7)
+    //     {
+    //         printf("\n");
+    //     }
+    // }
+
+    if (chan->last_page_type == 0 && chan->data[6] && !chan->data[7])
     {
-        bytes_to_number(&ephm->ura, buf + 72, 8, 4, 0);
-        bytes_to_number(&ephm->sv_health, buf + 76, 8, 6, 0);
-        bytes_to_number(&ephm->T_GD, buf + 196, 8, 8, 1);
-        bytes_to_number(&ephm->t_oc, buf + 218, 16, 16, 0);
-        bytes_to_number(&ephm->a_f2, buf + 240, 8, 8, 1);
-        bytes_to_number(&ephm->a_f1, buf + 248, 16, 16, 1);
-        bytes_to_number(&ephm->a_f0, buf + 270, 32, 22, 1);
+        bytes_to_number(&ephm->wn, chan->data + 96, 16, 12, 0);
+        bytes_to_number(&ephm->tow, chan->data + 108, 32, 20, 0);
+        printf("WN: %d, TOW: %d\n", wn, tow);
     }
-    else if (subframe_id == 0x2)
-    {
-        bytes_to_number(&ephm->C_rs, buf + 68, 16, 16, 1);
-        bytes_to_number(&ephm->delta_n, buf + 90, 16, 16, 1);
-        int32_t M_0_up;
-        int32_t M_0_dn;
-        bytes_to_number(&M_0_up, buf + 106, 32, 8, 0);
-        bytes_to_number(&M_0_dn, buf + 120, 32, 24, 0);
-        ephm->M_0 = (M_0_up << 24) | M_0_dn;
-        bytes_to_number(&ephm->C_uc, buf + 150, 16, 16, 1);
-        int32_t e_up;
-        int32_t e_dn;
-        bytes_to_number(&e_up, buf + 166, 32, 8, 0);
-        bytes_to_number(&e_dn, buf + 180, 32, 24, 0);
-        ephm->e = (e_up << 24) | e_dn;
-        bytes_to_number(&ephm->C_us, buf + 210, 16, 16, 1);
-        uint32_t root_A_up;
-        uint32_t root_A_dn;
-        bytes_to_number(&root_A_up, buf + 226, 32, 8, 0);
-        bytes_to_number(&root_A_dn, buf + 240, 32, 24, 0);
-        ephm->root_A = (root_A_up << 24) | root_A_dn;
-        bytes_to_number(&ephm->t_oe, buf + 270, 16, 16, 0);
-    }
-    else if (subframe_id == 0x3)
-    {
-        bytes_to_number(&ephm->C_ic, buf + 60, 16, 16, 1);
-        int32_t Omega_0_up;
-        int32_t Omega_0_dn;
-        bytes_to_number(&Omega_0_up, buf + 76, 32, 8, 0);
-        bytes_to_number(&Omega_0_dn, buf + 90, 32, 24, 0);
-        ephm->Omega_0 = (Omega_0_up << 24) | Omega_0_dn;
-        bytes_to_number(&ephm->C_is, buf + 120, 16, 16, 1);
-        int32_t i_0_up;
-        int32_t i_0_dn;
-        bytes_to_number(&i_0_up, buf + 136, 32, 8, 0);
-        bytes_to_number(&i_0_dn, buf + 150, 32, 24, 0);
-        ephm->i_0 = (i_0_up << 24) | i_0_dn;
-        bytes_to_number(&ephm->C_rc, buf + 180, 16, 16, 1);
-        int32_t omega_up;
-        int32_t omega_dn;
-        bytes_to_number(&omega_up, buf + 196, 32, 8, 0);
-        bytes_to_number(&omega_dn, buf + 210, 32, 24, 0);
-        ephm->omega = (omega_up << 24) | omega_dn;
-        bytes_to_number(&ephm->omega_dot, buf + 240, 32, 24, 1);
-        bytes_to_number(&ephm->IDOT, buf + 278, 16, 14, 1);
-    }
-    else if (subframe_id == 0x4)
-    {
-        uint8_t sv_id;
-        bytes_to_number(&sv_id, buf + 62, 8, 6, 0);
-        if (sv_id == 56)
-        {
-            bytes_to_number(&ephm->alpha_0, buf + 68, 8, 8, 1);
-            bytes_to_number(&ephm->alpha_1, buf + 76, 8, 8, 1);
-            bytes_to_number(&ephm->alpha_2, buf + 90, 8, 8, 1);
-            bytes_to_number(&ephm->alpha_3, buf + 98, 8, 8, 1);
-            bytes_to_number(&ephm->beta_0, buf + 106, 8, 8, 1);
-            bytes_to_number(&ephm->beta_1, buf + 120, 8, 8, 1);
-            bytes_to_number(&ephm->beta_2, buf + 128, 8, 8, 1);
-            bytes_to_number(&ephm->beta_3, buf + 136, 8, 8, 1);
-        }
-    }
+
+    // uint8_t subframe_id;
+    // bytes_to_number(&subframe_id, buf + 49, 8, 3, 0);
+    // if (subframe_id == 0x1)
+    //{
+    //     bytes_to_number(&ephm->ura, buf + 72, 8, 4, 0);
+    //     bytes_to_number(&ephm->sv_health, buf + 76, 8, 6, 0);
+    //     bytes_to_number(&ephm->T_GD, buf + 196, 8, 8, 1);
+    //     bytes_to_number(&ephm->t_oc, buf + 218, 16, 16, 0);
+    //     bytes_to_number(&ephm->a_f2, buf + 240, 8, 8, 1);
+    //     bytes_to_number(&ephm->a_f1, buf + 248, 16, 16, 1);
+    //     bytes_to_number(&ephm->a_f0, buf + 270, 32, 22, 1);
+    // }
+    // else if (subframe_id == 0x2)
+    //{
+    //     bytes_to_number(&ephm->C_rs, buf + 68, 16, 16, 1);
+    //     bytes_to_number(&ephm->delta_n, buf + 90, 16, 16, 1);
+    //     int32_t M_0_up;
+    //     int32_t M_0_dn;
+    //     bytes_to_number(&M_0_up, buf + 106, 32, 8, 0);
+    //     bytes_to_number(&M_0_dn, buf + 120, 32, 24, 0);
+    //     ephm->M_0 = (M_0_up << 24) | M_0_dn;
+    //     bytes_to_number(&ephm->C_uc, buf + 150, 16, 16, 1);
+    //     int32_t e_up;
+    //     int32_t e_dn;
+    //     bytes_to_number(&e_up, buf + 166, 32, 8, 0);
+    //     bytes_to_number(&e_dn, buf + 180, 32, 24, 0);
+    //     ephm->e = (e_up << 24) | e_dn;
+    //     bytes_to_number(&ephm->C_us, buf + 210, 16, 16, 1);
+    //     uint32_t root_A_up;
+    //     uint32_t root_A_dn;
+    //     bytes_to_number(&root_A_up, buf + 226, 32, 8, 0);
+    //     bytes_to_number(&root_A_dn, buf + 240, 32, 24, 0);
+    //     ephm->root_A = (root_A_up << 24) | root_A_dn;
+    //     bytes_to_number(&ephm->t_oe, buf + 270, 16, 16, 0);
+    // }
+    // else if (subframe_id == 0x3)
+    //{
+    //     bytes_to_number(&ephm->C_ic, buf + 60, 16, 16, 1);
+    //     int32_t Omega_0_up;
+    //     int32_t Omega_0_dn;
+    //     bytes_to_number(&Omega_0_up, buf + 76, 32, 8, 0);
+    //     bytes_to_number(&Omega_0_dn, buf + 90, 32, 24, 0);
+    //     ephm->Omega_0 = (Omega_0_up << 24) | Omega_0_dn;
+    //     bytes_to_number(&ephm->C_is, buf + 120, 16, 16, 1);
+    //     int32_t i_0_up;
+    //     int32_t i_0_dn;
+    //     bytes_to_number(&i_0_up, buf + 136, 32, 8, 0);
+    //     bytes_to_number(&i_0_dn, buf + 150, 32, 24, 0);
+    //     ephm->i_0 = (i_0_up << 24) | i_0_dn;
+    //     bytes_to_number(&ephm->C_rc, buf + 180, 16, 16, 1);
+    //     int32_t omega_up;
+    //     int32_t omega_dn;
+    //     bytes_to_number(&omega_up, buf + 196, 32, 8, 0);
+    //     bytes_to_number(&omega_dn, buf + 210, 32, 24, 0);
+    //     ephm->omega = (omega_up << 24) | omega_dn;
+    //     bytes_to_number(&ephm->omega_dot, buf + 240, 32, 24, 1);
+    //     bytes_to_number(&ephm->IDOT, buf + 278, 16, 14, 1);
+    // }
+    // else if (subframe_id == 0x4)
+    //{
+    //     uint8_t sv_id;
+    //     bytes_to_number(&sv_id, buf + 62, 8, 6, 0);
+    //     if (sv_id == 56)
+    //     {
+    //         bytes_to_number(&ephm->alpha_0, buf + 68, 8, 8, 1);
+    //         bytes_to_number(&ephm->alpha_1, buf + 76, 8, 8, 1);
+    //         bytes_to_number(&ephm->alpha_2, buf + 90, 8, 8, 1);
+    //         bytes_to_number(&ephm->alpha_3, buf + 98, 8, 8, 1);
+    //         bytes_to_number(&ephm->beta_0, buf + 106, 8, 8, 1);
+    //         bytes_to_number(&ephm->beta_1, buf + 120, 8, 8, 1);
+    //         bytes_to_number(&ephm->beta_2, buf + 128, 8, 8, 1);
+    //         bytes_to_number(&ephm->beta_3, buf + 136, 8, 8, 1);
+    //     }
+    // }
 }
 
 double e1b_time_from_epoch(double t, double t_epoch)
