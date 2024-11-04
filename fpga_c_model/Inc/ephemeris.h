@@ -2,10 +2,7 @@
 #define EPHEMERIS_H
 
 #include "stdint.h"
-#define mu 3.986005e14
-#define omega_e 7.2921151467e-5
-#define F -4.442807633e-10
-#define E_K_ITER 20
+#include "gps.h"
 
 typedef struct
 {

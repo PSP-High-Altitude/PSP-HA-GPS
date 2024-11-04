@@ -20,6 +20,7 @@ typedef struct
     uint32_t ca_rate;
     uint32_t lo_rate;
     uint32_t ca_phase;
+    double last_clock;
     uint32_t lo_phase;
     uint64_t ca_freq_integrator;
     uint64_t lo_freq_integrator;
@@ -51,6 +52,7 @@ typedef struct
     uint8_t data[128];
     uint8_t crc[24];
     uint8_t page_parts;
+    uint32_t tGST;
 
     e1b_ephemeris_t ephm;
 } e1b_channel_t;
@@ -60,5 +62,6 @@ uint8_t e1b_get_ca(e1b_ca_t *ca);
 void e1b_init_channel(e1b_channel_t *chan, int chan_num, int sv, double lo_dop, double ca_shift);
 void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample);
 void e1b_save_ephemeris_data(e1b_channel_t *chan);
+double e1b_get_tx_time(e1b_channel_t *chan);
 
 #endif

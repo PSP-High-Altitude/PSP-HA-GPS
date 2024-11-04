@@ -187,7 +187,7 @@ void e1b_init_channel(e1b_channel_t *chan, int chan_num, int sv, double lo_dop, 
 {
     chan->chan_num = chan_num;
     chan->sv = sv;
-    const double ca_dop = lo_dop / 1575.42e6 * 1023000.0;
+    double ca_dop = lo_dop / 1575.42e6 * 1023000.0;
     chan->phase_offset = (uint32_t)(fs / 125 - (ca_shift * fs / 1023000.0)) % ((int64_t)fs / 250);
 
     chan->ca_rate = (uint32_t)((1023000.0 + ca_dop) / fs * pow(2, 32));
@@ -217,6 +217,7 @@ void e1b_init_channel(e1b_channel_t *chan, int chan_num, int sv, double lo_dop, 
     chan->last_bit = 2;
     chan->last_t0 = 0;
     chan->page_parts = 0;
+    chan->last_clock = 0;
     memset(&chan->ephm, 0, sizeof(e1b_ephemeris_t));
 }
 
@@ -252,7 +253,7 @@ void e1b_do_sample(e1b_channel_t *chan, uint8_t sample)
 
 void e1b_process_ip_to_bit(e1b_channel_t *chan)
 {
-    if (e1b_save_idx[chan->sv] < 300)
+    if (clock / fs > 10 && e1b_save_idx[chan->sv] < 1000)
     {
         e1b_clock_save[e1b_save_idx[chan->sv]][chan->sv] = clock / fs;
         e1b_ip_save[e1b_save_idx[chan->sv]][chan->sv] = chan->ip;
@@ -324,8 +325,13 @@ uint8_t e1b_process_message(e1b_channel_t *chan)
     //     printf("\n");
     // }
 
+    printf("\n");
+
     // New page part
     chan->last_t0 = (chan->last_t0 + 1) % 30;
+    // Increment tGST
+    chan->tGST = (chan->tGST + 1) % ((uint32_t)4096*604800);
+    //printf("GST: %d\n", chan->tGST);
 
     // Ignore alert page
     if (decoded_bits[1] == 0x1)
@@ -333,12 +339,10 @@ uint8_t e1b_process_message(e1b_channel_t *chan)
         return 1;
     }
 
-    printf("\n");
-
     // Confirm page type is within range
     chan->last_page_half = decoded_bits[0];
     uint8_t page_type = 0;
-    printf("Page half: %d\n", chan->last_page_half);
+    //printf("Page half: %d\n", chan->last_page_half);
     if (chan->last_page_half == 0)
     {
         chan->page_parts = 1;
@@ -347,7 +351,7 @@ uint8_t e1b_process_message(e1b_channel_t *chan)
         {
             page_type |= decoded_bits[i + 2] << (5 - i);
         }
-        printf("Page type: %d\n", page_type);
+        //printf("Page type: %d\n", page_type);
     }
     else
     {
@@ -377,8 +381,6 @@ uint8_t e1b_process_message(e1b_channel_t *chan)
         chan->last_t0 = page_map[page_type];
     }
 
-    printf("t0 = %d\n", chan->last_t0);
-
     chan->last_page_type = page_type;
 
     return 1;
@@ -388,7 +390,6 @@ void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample)
 {
     uint8_t ca_full = (chan->ca_phase >> 31) & 0x1;
     uint8_t last_ca_full = ca_full;
-    static double last_ca_phase = 0;
     if (chan->ca_en)
     {
         chan->ca_phase += chan->ca_rate;
@@ -409,14 +410,15 @@ void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample)
     if (ca_full & !last_ca_full)
     {
         e1b_clock_ca(&chan->ca);
+        chan->ca_e = e1b_get_ca(&chan->ca);
+        chan->last_clock = clock / fs;
     }
 
-    chan->ca_e = e1b_get_ca(&chan->ca);
-    if (((double)chan->ca_phase / pow(2, 32)) >= fmod(0.25 + last_ca_phase, 1.0))
+    if (clock / fs >= chan->last_clock + (0.25/1023000))
     {
         chan->ca_l = chan->ca_p;
         chan->ca_p = chan->ca_e;
-        last_ca_phase = (double)chan->ca_phase / pow(2, 32);
+        chan->last_clock = clock / fs;
     }
     // if (ca_full && !ca_half)
     //{
@@ -435,14 +437,14 @@ void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample)
         int64_t power_late = chan->il * chan->il + chan->ql * chan->ql;
         int64_t code_phase_err = power_early - power_late;
 
-        chan->ca_freq_integrator += code_phase_err << 10;
-        int64_t new_ca_rate = chan->ca_freq_integrator + (code_phase_err << 19);
+        chan->ca_freq_integrator += code_phase_err << 6;
+        int64_t new_ca_rate = chan->ca_freq_integrator + (code_phase_err << 17);
         chan->ca_rate = new_ca_rate >> 32;
 
         int64_t carrier_phase_err = chan->ip * chan->qp;
 
-        chan->lo_freq_integrator += carrier_phase_err << 15;
-        int64_t new_lo_rate = chan->lo_freq_integrator + (carrier_phase_err << 19);
+        chan->lo_freq_integrator += carrier_phase_err << 17;
+        int64_t new_lo_rate = chan->lo_freq_integrator + (carrier_phase_err << 20);
         chan->lo_rate = new_lo_rate >> 32;
 
         // printf("carrier doppler from code lock: %lld\n",  (ca_freq_integrator >> 32));
@@ -450,8 +452,9 @@ void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample)
         // printf("carrier doppler from carrier lock: %20f\n",  ((lo_freq_integrator/4294967296.0)*fs/(4294967296.0))-fc);
         // printf("carrier doppler from carrier lock: %llu\n", lo_freq_integrator);
 
-        if (chan->total_ms == 300 * 4)
+        if (e1b_save_idx[chan->sv] == 1000)
         {
+            e1b_save_idx[chan->sv]++;
             // Plotting
             FILE *gnuplot_file = fopen("temp.dat", "w");
 
@@ -472,12 +475,15 @@ void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample)
             fprintf(gnuplot, "set yrange [-6000:6000]\n");
             // fprintf(gnuplot, "set y2range [0:20]\n");
             fprintf(gnuplot, "set ytics\n");
+            fprintf(gnuplot, "set xzeroaxis\n");
+            fprintf(gnuplot, "set yzeroaxis\n");
             // fprintf(gnuplot, "set y2tics\n");
             fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'IQ' axes x1y1 with points\n");
             // fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'I' axes x1y1 with lines, \\\n"
             //                  "'temp.dat' using 1:3 title 'ms' axes x1y2 with points\n");
 
             _pclose(gnuplot);
+
         }
         // printf("Subframe ID: %d\n", subframe_id);
 
@@ -488,6 +494,7 @@ void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample)
             if (e1b_process_message(chan))
             {
                 printf("SV: %d found page %d at %d ms!\n", chan->sv + 1, chan->last_page_type, chan->total_ms);
+                printf("power: %lld\n", chan->ip * chan->ip + chan->qp * chan->qp);
                 memmove(chan->nav_buf, chan->nav_buf + 250, chan->nav_bit_count -= 250);
             }
             else
@@ -514,13 +521,12 @@ double e1b_get_tx_time(e1b_channel_t *chan)
 {
     uint32_t chips = chan->ca.chip;
 
-    double t = chan->last_t0 +
-               chan->nav_bit_count / 250.0 +
+    double t = (chan->tGST % 604800) +
+               (chan->nav_bit_count ) / 250.0 +
                chips / 1023000.0 +
                (chan->ca_phase + (1U << 31)) * pow(2, -32) / 1023000.0;
 
-    // if (chan->sv + 1 == 29)
-    //     printf("%d,%u,%u,%u,%lu,%.10f\n", chan->last_z_count, chan->nav_bit_count, chan->nav_ms, chips, chan->ca_phase, t);
+    //printf("%u,%u,%u,%lu,%.10f\n", chan->tGST % 604800, chan->nav_bit_count, chips, chan->ca_phase, t);
 
     return t;
 }

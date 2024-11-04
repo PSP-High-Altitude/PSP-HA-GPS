@@ -5,9 +5,10 @@
 #include <math.h>
 #include "waves.h"
 
-double clock_save[300][32];
-uint8_t nav_ms_save[300][32];
-int64_t ip_save[300][32];
+double clock_save[1000][32];
+uint8_t nav_ms_save[1000][32];
+int64_t ip_save[1000][32];
+int64_t qp_save[1000][32];
 uint16_t save_idx[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 extern uint64_t clock;
@@ -169,7 +170,7 @@ void init_channel(channel_t *chan, int chan_num, int sv, double lo_dop, double c
 {
     chan->chan_num = chan_num;
     chan->sv = sv;
-    const double ca_dop = lo_dop / 1575.42e6 * 1023000.0;
+    double ca_dop = lo_dop / 1575.42e6 * 1023000.0;
     chan->phase_offset = (uint32_t)(fs / 500 - (ca_shift * fs / 1023000.0)) % ((int64_t)fs / 1000);
 
     chan->ca_rate = (uint32_t)((1023000.0 + ca_dop) / fs * pow(2, 32));
@@ -227,11 +228,13 @@ void do_sample(channel_t *chan, uint8_t sample)
 
 void process_ip_to_bit(channel_t *chan)
 {
-    if (save_idx[chan->sv] < 300)
+    if (save_idx[chan->sv] < 1000)
         clock_save[save_idx[chan->sv]][chan->sv] = clock / fs;
-    if (save_idx[chan->sv] < 300)
+    if (save_idx[chan->sv] < 1000)
         ip_save[save_idx[chan->sv]][chan->sv] = chan->ip;
-    if (save_idx[chan->sv] < 300)
+    if (save_idx[chan->sv] < 1000)
+        qp_save[save_idx[chan->sv]][chan->sv] = chan->qp;
+    if (save_idx[chan->sv] < 1000)
         nav_ms_save[save_idx[chan->sv]++][chan->sv] = chan->nav_ms;
 
     if (chan->last_bit == 2)
@@ -241,7 +244,7 @@ void process_ip_to_bit(channel_t *chan)
     else if (chan->nav_ms == 19)
     { // 20ms rollover
         uint8_t bit = (chan->ip > 0) ? 1 : 0;
-        if (chan->nav_bit_count < 300)
+        if (chan->nav_bit_count < 1000)
         {
             chan->nav_buf[chan->nav_bit_count++] = bit;
         }
@@ -354,9 +357,9 @@ void clock_channel(channel_t *chan, uint8_t sample)
     if (ca_full & !last_ca_full)
     {
         clock_ca(&chan->ca);
+        chan->ca_e = get_ca(&chan->ca);
     }
-
-    chan->ca_e = get_ca(&chan->ca);
+    
     if (ca_full && !ca_half)
     {
         chan->ca_l = chan->ca_p;
@@ -374,8 +377,8 @@ void clock_channel(channel_t *chan, uint8_t sample)
         int64_t power_late = chan->il * chan->il + chan->ql * chan->ql;
         int64_t code_phase_err = power_early - power_late;
 
-        chan->ca_freq_integrator += code_phase_err << 10;
-        int64_t new_ca_rate = chan->ca_freq_integrator + (code_phase_err << 20);
+        chan->ca_freq_integrator += code_phase_err << 15;
+        int64_t new_ca_rate = chan->ca_freq_integrator + (code_phase_err << 21);
         chan->ca_rate = new_ca_rate >> 32;
 
         int64_t carrier_phase_err = chan->ip * chan->qp;
@@ -384,35 +387,36 @@ void clock_channel(channel_t *chan, uint8_t sample)
         int64_t new_lo_rate = chan->lo_freq_integrator + (carrier_phase_err << 24);
         chan->lo_rate = new_lo_rate >> 32;
 
-        // printf("carrier doppler from code lock: %lld\n",  (ca_freq_integrator >> 32));
-        // printf("carrier doppler from code lock:    %20f\n",  (((ca_freq_integrator/4294967296.0)*fs/(4294967296.0))-1023000.0)*1575.42e6/1023000.0);
-        // printf("carrier doppler from carrier lock: %20f\n",  ((lo_freq_integrator/4294967296.0)*fs/(4294967296.0))-fc);
-        // printf("carrier doppler from carrier lock: %llu\n", lo_freq_integrator);
+        //printf("carrier doppler from code lock: %lld\n",  (ca_freq_integrator >> 32));
+        //printf("carrier doppler from code lock:    %20f\n",  (((ca_freq_integrator/4294967296.0)*fs/(4294967296.0))-1023000.0)*1575.42e6/1023000.0);
+        //printf("carrier doppler from carrier lock: %20f\n",  ((lo_freq_integrator/4294967296.0)*fs/(4294967296.0))-fc);
+        //printf("carrier doppler from carrier lock: %llu\n", lo_freq_integrator)
+        if (chan->total_ms == 1000)
+        {
+            // Plotting
+            FILE *gnuplot_file = fopen("temp.dat", "w");
 
-        // if (chan->total_ms == 300)
-        //{
-        //     // Plotting
-        //     FILE *gnuplot_file = fopen("temp.dat", "w");
-        //
-        //    FILE *gnuplot = _popen("gnuplot -persist", "w");
-        //
-        //    for (int i = 0; i < save_idx[chan->sv]; i++)
-        //    {
-        //        fprintf(gnuplot_file, "%g %g %g\n", clock_save[i][chan->sv], (double)ip_save[i][chan->sv], (double)nav_ms_save[i][chan->sv]);
-        //    }
-        //    fclose(gnuplot_file);
-        //
-        //    fprintf(gnuplot, "set title 'SV: %d'\n", chan->sv + 1);
-        //    fprintf(gnuplot, "set yrange [-2000:2000]\n");
-        //    fprintf(gnuplot, "set y2range [0:20]\n");
-        //    fprintf(gnuplot, "set ytics\n");
-        //    fprintf(gnuplot, "set y2tics\n");
-        //    fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'I' axes x1y1 with lines, \\\n"
-        //                     "'temp.dat' using 1:3 title 'ms' axes x1y2 with points\n");
-        //
-        //    _pclose(gnuplot);
-        //}
-        // printf("Subframe ID: %d\n", subframe_id);
+            FILE *gnuplot = _popen("gnuplot -persist", "w");
+
+            for (int i = 20; i < save_idx[chan->sv]; i++)
+            {
+                fprintf(gnuplot_file, "%g %g\n", (double)ip_save[i][chan->sv], (double)qp_save[i][chan->sv]);
+            }
+            fclose(gnuplot_file);
+
+            fprintf(gnuplot, "set title 'SV: %d'\n", chan->sv + 1);
+            //fprintf(gnuplot, "set xrange [-2000:2000]\n");
+            fprintf(gnuplot, "set yrange [-2000:2000]\n");
+            // fprintf(gnuplot, "set y2range [0:20]\n");
+            fprintf(gnuplot, "set ytics\n");
+            // fprintf(gnuplot, "set y2tics\n");
+            fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'IQ' axes x1y1 with points\n");
+            // fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'I' axes x1y1 with lines, \\\n"
+            //                  "'temp.dat' using 1:3 title 'ms' axes x1y2 with points\n");
+
+            _pclose(gnuplot);
+        }
+        //printf("Subframe ID: %d\n", subframe_id);
 
         // Process nav bits
         process_ip_to_bit(chan);
@@ -464,8 +468,7 @@ double get_tx_time(channel_t *chan)
                chips / 1023000.0 +
                (chan->ca_phase + (1U << 31)) * pow(2, -32) / 1023000.0;
 
-    // if (chan->sv + 1 == 29)
-    //     printf("%d,%u,%u,%u,%lu,%.10f\n", chan->last_z_count, chan->nav_bit_count, chan->nav_ms, chips, chan->ca_phase, t);
+    //printf("%d,%u,%u,%u,%lu,%.10f\n", chan->last_z_count, chan->nav_bit_count, chan->nav_ms, chips, chan->ca_phase, t);
 
     return t;
 }

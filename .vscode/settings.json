@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "e1b_channel.h": "c",
-        "ephemeris.h": "c"
+        "ephemeris.h": "c",
+        "e1b_ephemeris.h": "c",
+        "solve.h": "c"
     }
 }
