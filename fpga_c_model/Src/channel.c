@@ -4,12 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "waves.h"
-
-double clock_save[1000][32];
-uint8_t nav_ms_save[1000][32];
-int64_t ip_save[1000][32];
-int64_t qp_save[1000][32];
-uint16_t save_idx[32] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+#include "logging.h"
 
 extern uint64_t clock;
 
@@ -153,6 +148,7 @@ void clock_ca(ca_t *ca)
     uint16_t g2_shift_in = ((g2 >> 9) ^ (g2 >> 8) ^ (g2 >> 7) ^ (g2 >> 5) ^ (g2 >> 2) ^ (g2 >> 1)) & 0x1;
     ca->g1 = (g1 << 1) | g1_shift_in;
     ca->g2 = (g2 << 1) | g2_shift_in;
+    ca->chip = (ca->chip + 1) % 1023;
 }
 
 uint8_t get_ca(ca_t *ca)
@@ -183,6 +179,7 @@ void init_channel(channel_t *chan, int chan_num, int sv, double lo_dop, double c
     chan->ca.T1 = SVs[chan->sv * 4 + 3];
     chan->ca.g1 = 0x3FF;
     chan->ca.g2 = 0x3FF;
+    chan->ca.chip = 0;
 
     chan->ie = 0, chan->qe = 0, chan->ip = 0, chan->qp = 0, chan->il = 0, chan->ql = 0;
     chan->ca_e = 0, chan->ca_p = 0, chan->ca_l = 0;
@@ -228,14 +225,8 @@ void do_sample(channel_t *chan, uint8_t sample)
 
 void process_ip_to_bit(channel_t *chan)
 {
-    if (save_idx[chan->sv] < 1000)
-        clock_save[save_idx[chan->sv]][chan->sv] = clock / fs;
-    if (save_idx[chan->sv] < 1000)
-        ip_save[save_idx[chan->sv]][chan->sv] = chan->ip;
-    if (save_idx[chan->sv] < 1000)
-        qp_save[save_idx[chan->sv]][chan->sv] = chan->qp;
-    if (save_idx[chan->sv] < 1000)
-        nav_ms_save[save_idx[chan->sv]++][chan->sv] = chan->nav_ms;
+    int log_data[2] = {chan->ip, chan->qp};
+    logging_log(LOG_EVENT_TYPE_IQ, (void *)&log_data, chan->sv + 1, 0);
 
     if (chan->last_bit == 2)
     { // Initial state
@@ -244,11 +235,11 @@ void process_ip_to_bit(channel_t *chan)
     else if (chan->nav_ms == 19)
     { // 20ms rollover
         uint8_t bit = (chan->ip > 0) ? 1 : 0;
-        if (chan->nav_bit_count < 1000)
+        if (chan->nav_bit_count < 301)
         {
             chan->nav_buf[chan->nav_bit_count++] = bit;
         }
-        chan->last_bit = (chan->ip > 0) ? 1 : 0;
+        chan->last_bit = bit;
         chan->nav_ms = 0;
     }
     else if (chan->last_bit != ((chan->ip > 0) ? 1 : 0))
@@ -359,7 +350,7 @@ void clock_channel(channel_t *chan, uint8_t sample)
         clock_ca(&chan->ca);
         chan->ca_e = get_ca(&chan->ca);
     }
-    
+
     if (ca_full && !ca_half)
     {
         chan->ca_l = chan->ca_p;
@@ -387,45 +378,27 @@ void clock_channel(channel_t *chan, uint8_t sample)
         int64_t new_lo_rate = chan->lo_freq_integrator + (carrier_phase_err << 24);
         chan->lo_rate = new_lo_rate >> 32;
 
-        //printf("carrier doppler from code lock: %lld\n",  (ca_freq_integrator >> 32));
-        //printf("carrier doppler from code lock:    %20f\n",  (((ca_freq_integrator/4294967296.0)*fs/(4294967296.0))-1023000.0)*1575.42e6/1023000.0);
-        //printf("carrier doppler from carrier lock: %20f\n",  ((lo_freq_integrator/4294967296.0)*fs/(4294967296.0))-fc);
-        //printf("carrier doppler from carrier lock: %llu\n", lo_freq_integrator)
-        if (chan->total_ms == 1000)
-        {
-            // Plotting
-            FILE *gnuplot_file = fopen("temp.dat", "w");
-
-            FILE *gnuplot = _popen("gnuplot -persist", "w");
-
-            for (int i = 20; i < save_idx[chan->sv]; i++)
-            {
-                fprintf(gnuplot_file, "%g %g\n", (double)ip_save[i][chan->sv], (double)qp_save[i][chan->sv]);
-            }
-            fclose(gnuplot_file);
-
-            fprintf(gnuplot, "set title 'SV: %d'\n", chan->sv + 1);
-            //fprintf(gnuplot, "set xrange [-2000:2000]\n");
-            fprintf(gnuplot, "set yrange [-2000:2000]\n");
-            // fprintf(gnuplot, "set y2range [0:20]\n");
-            fprintf(gnuplot, "set ytics\n");
-            // fprintf(gnuplot, "set y2tics\n");
-            fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'IQ' axes x1y1 with points\n");
-            // fprintf(gnuplot, "plot 'temp.dat' using 1:2 title 'I' axes x1y1 with lines, \\\n"
-            //                  "'temp.dat' using 1:3 title 'ms' axes x1y2 with points\n");
-
-            _pclose(gnuplot);
-        }
-        //printf("Subframe ID: %d\n", subframe_id);
+        // printf("carrier doppler from code lock: %lld\n",  (ca_freq_integrator >> 32));
+        // printf("carrier doppler from code lock:    %20f\n",  (((ca_freq_integrator/4294967296.0)*fs/(4294967296.0))-1023000.0)*1575.42e6/1023000.0);
+        // printf("carrier doppler from carrier lock: %20f\n",  ((lo_freq_integrator/4294967296.0)*fs/(4294967296.0))-fc);
+        // printf("carrier doppler from carrier lock: %llu\n", lo_freq_integrator)
 
         // Process nav bits
         process_ip_to_bit(chan);
+        double log_data[6];
+        log_data[0] = chan->last_z_count * 6.0;
+        log_data[1] = chan->nav_bit_count / 50.0;
+        log_data[2] = chan->nav_ms / 1000.0;
+        log_data[3] = chan->ca.chip / 1023000.0;
+        log_data[4] = (chan->ca_phase + (1U << 31)) * pow(2, -32) / 1023000.0;
+        log_data[5] = 0;
+        logging_log(LOG_EVENT_TYPE_TIME, (void *)log_data, chan->sv + 1, 0);
         if (chan->nav_bit_count >= 300)
         {
             if (process_message(chan))
             {
                 printf("SV: %d found message at %d ms!\n", chan->sv + 1, chan->total_ms);
-                save_ephemeris_data(chan->nav_buf, &chan->ephm);
+                save_ephemeris_data(chan);
                 memmove(chan->nav_buf, chan->nav_buf + 300, chan->nav_bit_count -= 300);
             }
             else
@@ -450,25 +423,13 @@ void clock_channel(channel_t *chan, uint8_t sample)
 
 double get_tx_time(channel_t *chan)
 {
-    ca_t ca;
-    ca.T0 = SVs[chan->sv * 4 + 2];
-    ca.T1 = SVs[chan->sv * 4 + 3];
-    ca.g1 = 0x3FF;
-    ca.g2 = 0x3FF;
-    uint16_t chips = 0;
-    while (ca.g1 != chan->ca.g1)
-    {
-        chips++;
-        clock_ca(&ca);
-    }
+    double t = (chan->last_z_count * 6.0) +
+               (chan->nav_bit_count / 50.0) +
+               (chan->nav_ms / 1000.0) +
+               (chan->ca.chip / 1023000.0) +
+               ((chan->ca_phase + (1U << 31)) * pow(2, -32) / 1023000.0);
 
-    double t = chan->last_z_count * 6.0 +
-               chan->nav_bit_count / 50.0 +
-               chan->nav_ms / 1000.0 +
-               chips / 1023000.0 +
-               (chan->ca_phase + (1U << 31)) * pow(2, -32) / 1023000.0;
-
-    //printf("%d,%u,%u,%u,%lu,%.10f\n", chan->last_z_count, chan->nav_bit_count, chan->nav_ms, chips, chan->ca_phase, t);
+    // printf("%d,%u,%u,%u,%lu,%.10f\n", chan->last_z_count, chan->nav_bit_count, chan->nav_ms, chips, chan->ca_phase, t);
 
     return t;
 }

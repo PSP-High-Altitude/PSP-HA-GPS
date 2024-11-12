@@ -1,0 +1,1 @@
+gcc -g -lfftw3-3 -LC:/fftw3 -IC:/fftw3 fft_correlator_e1.cpp -o fft_correlator_e1.exe

@@ -30,7 +30,7 @@ typedef struct
     int16_t C_rc;
     int16_t C_rs;
 
-    // Page 4 - SVID, Ephemeris 4/4, clock correction 
+    // Page 4 - SVID, Ephemeris 4/4, clock correction
     int16_t C_ic;
     int16_t C_is;
     uint16_t t_oc;
@@ -43,13 +43,15 @@ typedef struct
     int16_t a_i1;
     int16_t a_i2;
     int16_t BGD;
+    uint8_t signal_health;
+    uint8_t data_validity;
 
     // Page 10 - GST-GPS conversion parameters
     int16_t A_0G;
     int16_t A_1G;
     uint8_t t_0G;
     uint8_t WN_0G;
-    
+
 } e1b_ephemeris_t;
 
 void e1b_get_satellite_ecef(e1b_ephemeris_t *ephm, double t, double *x, double *y, double *z);

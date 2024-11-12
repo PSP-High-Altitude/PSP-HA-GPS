@@ -1,14 +1,19 @@
 #include "ephemeris.h"
+#include "channel.h"
 #include "gps.h"
 #include "string.h"
 #include "stdio.h"
 #include "math.h"
 #include "tools.h"
 
-void save_ephemeris_data(uint8_t *buf, ephemeris_t *ephm)
+void save_ephemeris_data(channel_t *chan)
 {
+    ephemeris_t *ephm = &chan->ephm;
+    uint8_t *buf = chan->nav_buf;
+
     uint8_t subframe_id;
     bytes_to_number(&subframe_id, buf + 49, 8, 3, 0);
+
     if (subframe_id == 0x1)
     {
         bytes_to_number(&ephm->ura, buf + 72, 8, 4, 0);
@@ -176,6 +181,7 @@ double get_clock_correction(ephemeris_t *ephm, double t)
     double E_k = eccentric_anomaly(ephm, t_k);
     double t_R = F * e * root_A * sin(E_k);
     t = time_from_epoch(t, t_oc);
+    printf("clock correction: %g\n", a_f0 + a_f1 * t + a_f2 * (t * t) + t_R - T_GD);
 
     return a_f0 +
            a_f1 * t +

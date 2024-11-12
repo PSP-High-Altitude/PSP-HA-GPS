@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
     const int fc = 9334875; // or 1364000
     const int fs = 69984000;
     const char *in = "gnss-20170427-L1.1bit.I.bin";
-    const int ms = 4; // Length of data to process (milliseconds)
+    const int ms = 10; // Length of data to process (milliseconds)
     const int Start = 0;
 
     /**************************************

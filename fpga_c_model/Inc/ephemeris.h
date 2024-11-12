@@ -44,8 +44,6 @@ typedef struct
     int8_t beta_3;
 } ephemeris_t;
 
-void save_ephemeris_data(uint8_t *buf, ephemeris_t *ephm);
-
 void get_satellite_ecef(ephemeris_t *ephm, double t, double *x, double *y, double *z);
 
 double get_clock_correction(ephemeris_t *ephm, double t);

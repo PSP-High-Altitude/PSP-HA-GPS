@@ -13,6 +13,7 @@ typedef struct
     uint8_t T1;
     uint16_t g1;
     uint16_t g2;
+    uint16_t chip;
 } ca_t;
 
 typedef struct
@@ -52,6 +53,7 @@ typedef struct
     ephemeris_t ephm;
 } channel_t;
 
+void save_ephemeris_data(channel_t *chan);
 void clock_ca(ca_t *ca);
 uint8_t get_ca(ca_t *ca);
 void init_channel(channel_t *chan, int chan_num, int sv, double lo_dop, double ca_shift);
