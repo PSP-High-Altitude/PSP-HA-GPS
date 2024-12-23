@@ -9,7 +9,7 @@ samples_i = samples[::2] < 0
 print("Samples read: ", len(samples_i))
 
 # Write as one bit I
-with open('gnss-20170427-L1.1bit.I.bin', 'wb') as f:
+with open('gnss-20170427-L1.3bit.I.bin', 'wb') as f:
     by = 0
     for i in range(len(samples_i)):
         by = by | (int(samples_i[i]) << (i % 8))

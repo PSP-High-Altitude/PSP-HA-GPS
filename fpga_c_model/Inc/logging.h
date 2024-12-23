@@ -5,8 +5,9 @@
 
 typedef enum
 {
-    LOG_EVENT_TYPE_IQ,   // Param1: SV, Param2: GNSS (0 - GPS, 1 - Galileo)
-    LOG_EVENT_TYPE_TIME, // Param1: SV, Param2: GNSS (0 - GPS, 1 - Galileo)
+    LOG_EVENT_TYPE_IQ,     // Param1: SV, Param2: GNSS (0 - GPS, 1 - Galileo)
+    LOG_EVENT_TYPE_TIME,   // Param1: SV, Param2: GNSS (0 - GPS, 1 - Galileo)
+    LOG_EVENT_TYPE_FILTER, // Param1: SV, Param2: GNSS (0 - GPS, 1 - Galileo)
 } log_event_type_t;
 
 typedef struct

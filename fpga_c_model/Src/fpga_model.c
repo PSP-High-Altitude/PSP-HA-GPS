@@ -68,6 +68,7 @@ int main()
     e1b_init_channel(&e1b_channels[0], 0, sv[0] - 1, lo_dop[0], ca_shift[0]);
     logging_create_log(LOG_EVENT_TYPE_IQ, sv[0], 1);
     logging_create_log(LOG_EVENT_TYPE_TIME, sv[0], 1);
+    logging_create_log(LOG_EVENT_TYPE_FILTER, sv[0], 1);
     // e1b_init_channel(&e1b_channels[1], 1, sv[1] - 1, lo_dop[1], ca_shift[1]);
     e1b_chan_count += 1;
 
@@ -80,6 +81,9 @@ int main()
     logging_create_log(LOG_EVENT_TYPE_TIME, sv[1], 0);
     logging_create_log(LOG_EVENT_TYPE_TIME, sv[2], 0);
     logging_create_log(LOG_EVENT_TYPE_TIME, sv[3], 0);
+    logging_create_log(LOG_EVENT_TYPE_FILTER, sv[1], 0);
+    logging_create_log(LOG_EVENT_TYPE_FILTER, sv[2], 0);
+    logging_create_log(LOG_EVENT_TYPE_FILTER, sv[3], 0);
     chan_count += 3;
 
     while (time_limit--)

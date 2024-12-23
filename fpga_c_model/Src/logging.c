@@ -18,6 +18,9 @@ void logging_create_log(log_event_type_t event_type, int param1, int param2)
     case LOG_EVENT_TYPE_TIME:
         snprintf(logs[num_logs].filename, 256, "log/time-%s-%d.csv", param2 == 0 ? "gps" : "galileo", param1);
         break;
+    case LOG_EVENT_TYPE_FILTER:
+        snprintf(logs[num_logs].filename, 256, "log/filter-%s-%d.csv", param2 == 0 ? "gps" : "galileo", param1);
+        break;
     }
 
     logs[num_logs].file = fopen(logs[num_logs].filename, "w");
@@ -50,6 +53,12 @@ void logging_log(log_event_type_t event_type, void *data, int param1, int param2
                 if (param1 == logs[i].param1 && param2 == logs[i].param2)
                 {
                     fprintf(logs[i].file, "%g,%g,%g,%g,%g,%.15f\n", ((double *)data)[0], ((double *)data)[1], ((double *)data)[2], ((double *)data)[3], ((double *)data)[4], ((double *)data)[5]);
+                }
+                break;
+            case LOG_EVENT_TYPE_FILTER:
+                if (param1 == logs[i].param1 && param2 == logs[i].param2)
+                {
+                    fprintf(logs[i].file, "%.0f,%.0f,%.0f,%.0f,%.0f,%.0f\n", ((double *)data)[0], ((double *)data)[1], ((double *)data)[2], ((double *)data)[3], ((double *)data)[4], ((double *)data)[5]);
                 }
                 break;
             }

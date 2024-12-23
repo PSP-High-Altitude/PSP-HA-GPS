@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "e1b_channel.h": "c",
+        "string.h": "c",
+        "gps.h": "c",
+        "ephemeris.h": "c",
+        "logging.h": "c",
+        "channel.h": "c"
+    }
+}

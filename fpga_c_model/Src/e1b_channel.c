@@ -432,9 +432,18 @@ void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample)
 
         int64_t carrier_phase_err = chan->ip * chan->qp;
 
-        chan->lo_freq_integrator += carrier_phase_err << 17;
+        chan->lo_freq_integrator += carrier_phase_err << 15;
         int64_t new_lo_rate = chan->lo_freq_integrator + (carrier_phase_err << 20);
         chan->lo_rate = new_lo_rate >> 32;
+
+        double log_data[6];
+        log_data[0] = code_phase_err;
+        log_data[1] = chan->ca_freq_integrator;
+        log_data[2] = chan->ca_rate;
+        log_data[3] = carrier_phase_err;
+        log_data[4] = chan->lo_freq_integrator;
+        log_data[5] = chan->lo_rate;
+        logging_log(LOG_EVENT_TYPE_FILTER, (void *)log_data, chan->sv + 1, 1);
 
         // printf("carrier doppler from code lock: %lld\n",  (ca_freq_integrator >> 32));
         // printf("carrier doppler from code lock:    %20f\n",  (((ca_freq_integrator/4294967296.0)*fs/(4294967296.0))-1023000.0)*1575.42e6/1023000.0);
@@ -443,7 +452,6 @@ void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample)
 
         // Process nav bits
         e1b_process_ip_to_bit(chan);
-        double log_data[6];
         uint32_t chips = chan->ca.chip;
         log_data[0] = (chan->tGST % 604800);
         log_data[1] = chan->nav_bit_count / 250.0;

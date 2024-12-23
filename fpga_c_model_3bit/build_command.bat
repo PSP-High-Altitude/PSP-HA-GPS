@@ -1,0 +1,1 @@
+gcc D:/github_repos/PSP-GPS/fpga_c_model_3bit/Src/*.c -ID:/github_repos/PSP-GPS/fpga_c_model_3bit/Inc -O3 -g -o fpga_model_3bit.exe
