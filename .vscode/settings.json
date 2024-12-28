@@ -4,5 +4,6 @@
         "ephemeris.h": "c",
         "e1b_ephemeris.h": "c",
         "solve.h": "c"
-    }
+    },
+    "cmake.sourceDirectory": "C:/Users/griff/Documents/PSP-HA-GPS/fft_correlator"
 }

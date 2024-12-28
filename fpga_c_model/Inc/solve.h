@@ -12,7 +12,7 @@
 
 #define MAX_ITER 20
 
-uint8_t solve(channel_t **chan, int num_chans, e1b_channel_t **e1b_chan, int num_e1b_chans, double *x, double *y, double *z, double *t_bias);
+uint8_t solve(channel_t *chan, int num_chans, e1b_channel_t *e1b_chan, int num_e1b_chans, double *x, double *y, double *z, double *t_bias);
 
 void to_coords(double x, double y, double z, double *lat, double *lon, double *alt);
 

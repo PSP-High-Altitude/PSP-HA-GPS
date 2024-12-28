@@ -195,7 +195,10 @@ void init_channel(channel_t *chan, int chan_num, int sv, double lo_dop, double c
     chan->nav_valid = 0;
     chan->nav_bit_count = 0;
     chan->last_z_count = 0;
-    chan->last_bit = 2;
+    chan->bit_sync_locked = 0;
+    chan->bit_sync_count = 1000;    // 1 second
+    chan->last_bit = 0;
+    memset(chan->bit_edge_hist, 0, sizeof(chan->bit_edge_hist));
     memset(&chan->ephm, 0, sizeof(ephemeris_t));
 }
 
@@ -227,31 +230,51 @@ void process_ip_to_bit(channel_t *chan)
 {
     int log_data[2] = {chan->ip, chan->qp};
     logging_log(LOG_EVENT_TYPE_IQ, (void *)&log_data, chan->sv + 1, 0);
+    
+    // Use the histogram method for synchronizing bits: first we will sample for
+    // for a while then pick the most common transition edge as the bit edge point
 
-    if (chan->last_bit == 2)
-    { // Initial state
-        chan->last_bit = (chan->ip > 0) ? 1 : 0;
-    }
-    else if (chan->nav_ms == 19)
-    { // 20ms rollover
-        uint8_t bit = (chan->ip > 0) ? 1 : 0;
-        if (chan->nav_bit_count < 301)
-        {
-            chan->nav_buf[chan->nav_bit_count++] = bit;
+    // Not locked
+    if(chan->bit_sync_locked == 0) {
+        // Update histogram if a bit edge is found
+        if(chan->last_bit != (chan->ip > 0) ? 1 : 0) {
+            chan->bit_edge_hist[chan->nav_ms] += 1;
+            chan->last_bit = (chan->ip > 0) ? 1 : 0;
         }
-        chan->last_bit = bit;
-        chan->nav_ms = 0;
+
+        // Count down
+        chan->bit_sync_count--;
+
+        // Check if we have enough samples to make a decision
+        if(chan->bit_sync_count == 0) {
+            // Find the most common edge
+            int max = 0;
+            int max_idx = 0;
+            for(int i = 0; i < 20; i++) {
+                if(chan->bit_edge_hist[i] > max) {
+                    max = chan->bit_edge_hist[i];
+                    max_idx = i;
+                }
+            }
+            
+            // Center the bit edge point to nav_ms = 0
+            chan->bit_sync_locked = 1;  
+            chan->nav_ms -= max_idx + 1;
+            if(chan->nav_ms < 0) chan->nav_ms += 20;
+        }    
+    } else {    // Locked
+        // End of bit period
+        if(chan->nav_ms == 0) {
+            chan->nav_buf[chan->nav_bit_count] = chan->bit_avg > 0 ? 1 : 0;
+            chan->nav_bit_count++;
+            chan->bit_avg = 0;
+        }
+        // Middle of bit period
+        chan->bit_avg += (chan->ip > 0) ? 1 : -1;
     }
-    else if (chan->last_bit != ((chan->ip > 0) ? 1 : 0))
-    { // Unexpected transition
-        chan->last_bit = (chan->ip > 0) ? 1 : 0;
-        chan->nav_ms = 0;
-    }
-    else
-    { // Middle of bit
-        chan->nav_ms++;
-    }
-    chan->total_ms++;
+
+    chan->nav_ms = (chan->nav_ms + 1) % 20;
+    chan->total_ms += 1;
 
     // printf("SV: %d\n\tBit: %d\n\tms: %d\n", chan->sv + 1, chan->last_bit, chan->nav_ms);
 }
@@ -282,8 +305,15 @@ uint8_t process_message(channel_t *chan)
         p[4] = p[5] = 0;
     else if (memcmp(chan->nav_buf, preamble_inv, 8) == 0)
         p[4] = p[5] = 1;
-    else
+    else {
+        if(chan->sv == 3) {
+            printf("Preamble not found\n");
+        }
         return 0;
+    }
+
+    uint8_t tmp_buf[300];
+    memcpy(tmp_buf, chan->nav_buf, 300);
 
     // Check 10 word parities
     for (uint8_t i = 0; i < 10; i++)
@@ -291,6 +321,18 @@ uint8_t process_message(channel_t *chan)
         if (!check_parity(chan->nav_buf + i * 30, p, p[4], p[5]))
         {
             chan->wait_frames = 2;
+            if(chan->sv == 3) {
+                printf("Parity fail: %d\n", i);
+                uint8_t subframe_id = (chan->nav_buf[29 + 20] << 2) | (chan->nav_buf[29 + 21] << 1) | chan->nav_buf[29 + 22];
+                printf("Subframe ID: %d\n", subframe_id);
+                if(i == 6) {
+                    for(int j = 0; j < 300; j++) {
+                        if((j > 0) && ((j % 30) == 0)) printf("\n");
+                        printf("%d", tmp_buf[j]);
+                    }
+                    printf("\n");
+                }
+            }
             return 0;
         }
     }
@@ -300,6 +342,9 @@ uint8_t process_message(channel_t *chan)
     if (subframe_id < 1 || subframe_id > 5)
     {
         chan->wait_frames = 2;
+        if(chan->sv == 3) {
+            printf("HOW invalid: %d\n", subframe_id);
+        }
         return 0;
     }
 
@@ -366,13 +411,19 @@ void clock_channel(channel_t *chan, uint8_t sample)
     {
         int64_t power_early = chan->ie * chan->ie + chan->qe * chan->qe;
         int64_t power_late = chan->il * chan->il + chan->ql * chan->ql;
+        int64_t power_prompt = chan->ip * chan->ip + chan->qp * chan->qp;
+
         int64_t code_phase_err = power_early - power_late;
+        int64_t carrier_phase_err = chan->ip * chan->qp;
+
+        if(power_prompt < 1000000) {
+            code_phase_err <<= 1;
+            carrier_phase_err <<= 1;
+        }
 
         chan->ca_freq_integrator += code_phase_err << 15;
         int64_t new_ca_rate = chan->ca_freq_integrator + (code_phase_err << 21);
         chan->ca_rate = new_ca_rate >> 32;
-
-        int64_t carrier_phase_err = chan->ip * chan->qp;
 
         chan->lo_freq_integrator += carrier_phase_err << 16;
         int64_t new_lo_rate = chan->lo_freq_integrator + (carrier_phase_err << 24);
@@ -406,6 +457,7 @@ void clock_channel(channel_t *chan, uint8_t sample)
             if (process_message(chan))
             {
                 printf("SV: %d found message at %d ms!\n", chan->sv + 1, chan->total_ms);
+                chan->bit_sync_locked = 1; // Lock in the bit synchronization if we got a valid message
                 save_ephemeris_data(chan);
                 memmove(chan->nav_buf, chan->nav_buf + 300, chan->nav_bit_count -= 300);
             }
@@ -433,11 +485,11 @@ double get_tx_time(channel_t *chan)
 {
     double t = (chan->last_z_count * 6.0) +
                (chan->nav_bit_count / 50.0) +
-               (chan->nav_ms / 1000.0) +
+               ((chan->nav_ms + 1) / 1000.0) +
                (chan->ca.chip / 1023000.0) +
                ((chan->ca_phase + (1U << 31)) * pow(2, -32) / 1023000.0);
 
-    // printf("%d,%u,%u,%u,%lu,%.10f\n", chan->last_z_count, chan->nav_bit_count, chan->nav_ms, chips, chan->ca_phase, t);
+    printf("%d,%u,%u,%u,%lu,%.10f\n", chan->last_z_count, chan->nav_bit_count, chan->nav_ms, chan->ca.chip, chan->ca_phase, t);
 
     return t;
 }

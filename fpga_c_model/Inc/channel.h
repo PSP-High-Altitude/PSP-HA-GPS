@@ -42,13 +42,18 @@ typedef struct
 
     uint8_t tracked_this_epoch;
     uint8_t wait_frames;
-    uint8_t nav_ms;
-    uint32_t total_ms;
+    int nav_ms;
+    uint64_t total_ms;
     uint8_t nav_buf[NAV_BUFFER_SIZE + 1];
     uint16_t nav_bit_count;
     uint8_t nav_valid;
     int32_t last_z_count;
+
+    uint8_t bit_sync_locked;
     uint8_t last_bit;
+    int bit_sync_count;
+    int bit_edge_hist[20];
+    int8_t bit_avg;
 
     ephemeris_t ephm;
 } channel_t;

@@ -9,6 +9,4 @@
 #define F -4.442807633e-10
 #define E_K_ITER 20
 
-#define NUM_CHANNELS 4
-
 #endif

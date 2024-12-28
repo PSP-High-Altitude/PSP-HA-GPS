@@ -11,30 +11,24 @@
 #include "signal.h"
 #include "stdlib.h"
 
-int chan_count = 0;
-int e1b_chan_count = 0;
+// GPS L1 C/A Channels
+channel_t channels_gps_l1ca[24];
+int count_channels_gps_l1ca = 0;
+#define CREATE_GPS_L1CA_CHANNEL(sv, lo_dop, ca_shift) \
+    init_channel(&channels_gps_l1ca[count_channels_gps_l1ca], count_channels_gps_l1ca, sv-1, lo_dop, ca_shift); \
+    logging_create_log(LOG_EVENT_TYPE_IQ, sv, 0); \
+    logging_create_log(LOG_EVENT_TYPE_TIME, sv, 0); \
+    logging_create_log(LOG_EVENT_TYPE_FILTER, sv, 0); \
+    count_channels_gps_l1ca++;
 
-const int sv[] = {
-    24,
-    // 26,
-    5,
-    4,
-    21,
-};
-const double lo_dop[] = {
-    -246.0,
-    // 1000.0,
-    1400.0,
-    -3000.0,
-    -2400.0,
-};
-const double ca_shift[] = {
-    2837.5,
-    // 1001.1 - 0.5,
-    969.4,
-    367.0,
-    817.4,
-};
+e1b_channel_t channels_galileo_e1b[24];
+int count_channels_galileo_e1b = 0;
+#define CREATE_GALILEO_E1B_CHANNEL(sv, lo_dop, ca_shift) \
+    e1b_init_channel(&channels_galileo_e1b[count_channels_galileo_e1b], count_channels_galileo_e1b, sv-1, lo_dop, ca_shift); \
+    logging_create_log(LOG_EVENT_TYPE_IQ, sv, 1); \
+    logging_create_log(LOG_EVENT_TYPE_TIME, sv, 1); \
+    logging_create_log(LOG_EVENT_TYPE_FILTER, sv, 1); \
+    count_channels_galileo_e1b++;
 
 uint8_t file_buf;
 uint8_t file_buf_idx = 0;
@@ -62,29 +56,15 @@ int main()
     printf("lon,lat,alt\n");
 
     file = fopen("../gnss-20170427-L1.1bit.I.bin", "rb");
-    e1b_channel_t e1b_channels[1];
-    channel_t channels[3];
 
-    e1b_init_channel(&e1b_channels[0], 0, sv[0] - 1, lo_dop[0], ca_shift[0]);
-    logging_create_log(LOG_EVENT_TYPE_IQ, sv[0], 1);
-    logging_create_log(LOG_EVENT_TYPE_TIME, sv[0], 1);
-    logging_create_log(LOG_EVENT_TYPE_FILTER, sv[0], 1);
-    // e1b_init_channel(&e1b_channels[1], 1, sv[1] - 1, lo_dop[1], ca_shift[1]);
-    e1b_chan_count += 1;
+    CREATE_GALILEO_E1B_CHANNEL(24, -246.0, 2837.5);
+    //CREATE_GALILEO_E1B_CHANNEL(14, -3200.0, 3770.1);
+    CREATE_GPS_L1CA_CHANNEL(5, 1400.0, 969.4);
+    CREATE_GPS_L1CA_CHANNEL(2, 1600.0, 7.0);
+    CREATE_GPS_L1CA_CHANNEL(21, -2400.0, 817.4);
+    CREATE_GPS_L1CA_CHANNEL(26, -3400, 446.3);
 
-    init_channel(&channels[0], 1, sv[1] - 1, lo_dop[1], ca_shift[1]);
-    init_channel(&channels[1], 2, sv[2] - 1, lo_dop[2], ca_shift[2]);
-    init_channel(&channels[2], 3, sv[3] - 1, lo_dop[3], ca_shift[3]);
-    logging_create_log(LOG_EVENT_TYPE_IQ, sv[1], 0);
-    logging_create_log(LOG_EVENT_TYPE_IQ, sv[2], 0);
-    logging_create_log(LOG_EVENT_TYPE_IQ, sv[3], 0);
-    logging_create_log(LOG_EVENT_TYPE_TIME, sv[1], 0);
-    logging_create_log(LOG_EVENT_TYPE_TIME, sv[2], 0);
-    logging_create_log(LOG_EVENT_TYPE_TIME, sv[3], 0);
-    logging_create_log(LOG_EVENT_TYPE_FILTER, sv[1], 0);
-    logging_create_log(LOG_EVENT_TYPE_FILTER, sv[2], 0);
-    logging_create_log(LOG_EVENT_TYPE_FILTER, sv[3], 0);
-    chan_count += 3;
+    logging_create_log(LOG_EVENT_TYPE_PVT, 0, 0);
 
     while (time_limit--)
     {
@@ -107,28 +87,19 @@ int main()
             file_buf_idx++;
         }
         uint8_t sample = (file_buf >> file_buf_idx) & 0x1;
-        for (int i = 0; i < e1b_chan_count; i++)
+        for (int i = 0; i < count_channels_galileo_e1b; i++)
         {
-            e1b_clock_channel(&e1b_channels[i], sample);
+            e1b_clock_channel(&channels_galileo_e1b[i], sample);
         }
-        for (int i = 0; i < chan_count; i++)
+        for (int i = 0; i < count_channels_gps_l1ca; i++)
         {
-            clock_channel(&channels[i], sample);
+            clock_channel(&channels_gps_l1ca[i], sample);
         }
 
         if (clock % (lrint(fs) / 1) == 0)
         {
             double x, y, z, t_bias;
             double lat, lon, alt;
-            e1b_channel_t *e1b_channels_in_soln[] = {
-                &e1b_channels[0],
-                //&e1b_channels[1],
-            };
-            channel_t *channels_in_soln[] = {
-                &channels[0],
-                &channels[1],
-                &channels[2],
-            };
             uint8_t ready = 1;
             // for (int i = 0; i < NUM_CHANNELS; i++)
             //{
@@ -139,10 +110,12 @@ int main()
             //     }
             // }
 
-            if (ready && solve(channels_in_soln, 3, e1b_channels_in_soln, 1, &x, &y, &z, &t_bias))
+            if (ready && solve(channels_gps_l1ca, count_channels_gps_l1ca, channels_galileo_e1b, count_channels_galileo_e1b, &x, &y, &z, &t_bias))
             {
                 // printf("x: %g, y: %g, z: %g, t_bias: %g\n", x, y, z, t_bias);
                 to_coords(x, y, z, &lat, &lon, &alt);
+                double solve_log[7] = {x, y, z, t_bias, lat, lon, alt};
+                logging_log(LOG_EVENT_TYPE_PVT, (void *)&solve_log, 0, 0);
                 printf("lat,lon,alt: %.8f,%.8f,%.8f\n", lat, lon, alt);
                 // if (avg_count < AVG_COUNT)
                 //{

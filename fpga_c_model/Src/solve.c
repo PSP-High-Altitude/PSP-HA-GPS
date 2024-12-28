@@ -7,30 +7,43 @@
 #include "math.h"
 #include "stdio.h"
 #include "logging.h"
+#include "stdlib.h"
 
-uint8_t solve(channel_t **chan, int num_chans, e1b_channel_t **e1b_chan, int num_e1b_chans, double *x, double *y, double *z, double *t_bias)
+uint8_t solve(channel_t *chan, int num_chans, e1b_channel_t *e1b_chan, int num_e1b_chans, double *x, double *y, double *z, double *t_bias)
 {
     *x = 0;
     *y = 0;
     *z = 0;
     *t_bias = 0;
 
-    double t_tx[NUM_CHANNELS];
-    double x_sat[NUM_CHANNELS];
-    double y_sat[NUM_CHANNELS];
-    double z_sat[NUM_CHANNELS];
-    double weights[NUM_CHANNELS];
-    double dPR[NUM_CHANNELS];
-    double jac[NUM_CHANNELS][4], ma[4][4], mb[4][4], mc[4][NUM_CHANNELS], md[4];
-    double t_rx;
+    double *t_tx = (double*)malloc(sizeof(double) * (num_chans + num_e1b_chans));
+    double *x_sat = (double*)malloc(sizeof(double) * (num_chans + num_e1b_chans));
+    double *y_sat = (double*)malloc(sizeof(double) * (num_chans + num_e1b_chans));
+    double *z_sat = (double*)malloc(sizeof(double) * (num_chans + num_e1b_chans));
+    double *weights = (double*)malloc(sizeof(double) * (num_chans + num_e1b_chans));
+    double *dPR = (double*)malloc(sizeof(double) * (num_chans + num_e1b_chans));
 
+    double **jac = (double**)malloc(sizeof(double*) * (num_chans + num_e1b_chans));
+    for (int i = 0; i < num_chans + num_e1b_chans; i++)
+    {
+        jac[i] = (double*)malloc(sizeof(double) * 4);
+    }
+
+    double *mc[4];
+    for (int i = 0; i < 4; i++)
+    {
+        mc[i] = (double*)malloc(sizeof(double) * (num_chans + num_e1b_chans));
+    }
+
+    double ma[4][4], mb[4][4], md[4];
+    double t_rx;
     double t_pc = 0;
 
     for (int i = 0; i < num_chans; i++)
     {
-        t_tx[i] = get_tx_time(chan[i]);
-        t_tx[i] -= get_clock_correction(&chan[i]->ephm, t_tx[i]);
-        get_satellite_ecef(&chan[i]->ephm, t_tx[i], x_sat + i, y_sat + i, z_sat + i);
+        t_tx[i] = get_tx_time(&chan[i]);
+        t_tx[i] -= get_clock_correction(&chan[i].ephm, t_tx[i]);
+        get_satellite_ecef(&chan[i].ephm, t_tx[i], x_sat + i, y_sat + i, z_sat + i);
         // printf("ecef: %g, %g, %g\n", x_sat[i], y_sat[i], z_sat[i]);
         t_pc += t_tx[i];
         printf("t_tx[%d]: %.5f\n", i, t_tx[i]);
@@ -39,9 +52,9 @@ uint8_t solve(channel_t **chan, int num_chans, e1b_channel_t **e1b_chan, int num
 
     for (int i = num_chans; i < num_e1b_chans + num_chans; i++)
     {
-        t_tx[i] = e1b_get_tx_time(e1b_chan[i - num_chans]);
-        t_tx[i] -= e1b_get_clock_correction(&e1b_chan[i - num_chans]->ephm, t_tx[i]);
-        e1b_get_satellite_ecef(&e1b_chan[i - num_chans]->ephm, t_tx[i], x_sat + i, y_sat + i, z_sat + i);
+        t_tx[i] = e1b_get_tx_time(&e1b_chan[i - num_chans]);
+        t_tx[i] -= e1b_get_clock_correction(&e1b_chan[i - num_chans].ephm, t_tx[i]);
+        e1b_get_satellite_ecef(&e1b_chan[i - num_chans].ephm, t_tx[i], x_sat + i, y_sat + i, z_sat + i);
         // printf("ecef: %g, %g, %g\n", x_sat[i], y_sat[i], z_sat[i]);
         t_pc += t_tx[i];
         printf("t_tx[%d]: %.5f\n", i, t_tx[i]);
@@ -155,8 +168,10 @@ uint8_t solve(channel_t **chan, int num_chans, e1b_channel_t **e1b_chan, int num
         if (i + 1 == MAX_ITER)
             printf("error: %.5f\n", error);
 
-        if (error < 1.0)
+        if (error < 1.0) {
+            printf("error: %.5f\n", error);
             break;
+        }
         *x += dx;
         *y += dy;
         *z += dz;

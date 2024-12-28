@@ -426,14 +426,14 @@ void e1b_clock_channel(e1b_channel_t *chan, uint8_t sample)
         int64_t power_late = chan->il * chan->il + chan->ql * chan->ql;
         int64_t code_phase_err = power_early - power_late;
 
-        chan->ca_freq_integrator += code_phase_err << 5;
-        int64_t new_ca_rate = chan->ca_freq_integrator + (code_phase_err << 17);
+        chan->ca_freq_integrator += code_phase_err << 9;
+        int64_t new_ca_rate = chan->ca_freq_integrator + (code_phase_err << 15);
         chan->ca_rate = new_ca_rate >> 32;
 
         int64_t carrier_phase_err = chan->ip * chan->qp;
 
         chan->lo_freq_integrator += carrier_phase_err << 15;
-        int64_t new_lo_rate = chan->lo_freq_integrator + (carrier_phase_err << 20);
+        int64_t new_lo_rate = chan->lo_freq_integrator + (carrier_phase_err << 19);
         chan->lo_rate = new_lo_rate >> 32;
 
         double log_data[6];
@@ -497,7 +497,7 @@ double e1b_get_tx_time(e1b_channel_t *chan)
                (chips / 1023000.0) +
                ((chan->ca_phase + (1U << 31)) * pow(2, -32) / 1023000.0);
 
-    // printf("%u,%u,%u,%lu,%.10f\n", chan->tGST % 604800, chan->nav_bit_count, chips, chan->ca_phase, t);
+    printf("%u,%u,%u,%lu,%.10f\n", chan->tGST % 604800, chan->nav_bit_count, chips, chan->ca_phase, t);
 
     return t;
 }

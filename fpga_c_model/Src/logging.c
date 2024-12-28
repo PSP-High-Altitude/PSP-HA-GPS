@@ -21,6 +21,9 @@ void logging_create_log(log_event_type_t event_type, int param1, int param2)
     case LOG_EVENT_TYPE_FILTER:
         snprintf(logs[num_logs].filename, 256, "log/filter-%s-%d.csv", param2 == 0 ? "gps" : "galileo", param1);
         break;
+    case LOG_EVENT_TYPE_PVT:
+        snprintf(logs[num_logs].filename, 256, "log/pvt.csv");
+        break;
     }
 
     logs[num_logs].file = fopen(logs[num_logs].filename, "w");
@@ -60,6 +63,10 @@ void logging_log(log_event_type_t event_type, void *data, int param1, int param2
                 {
                     fprintf(logs[i].file, "%.0f,%.0f,%.0f,%.0f,%.0f,%.0f\n", ((double *)data)[0], ((double *)data)[1], ((double *)data)[2], ((double *)data)[3], ((double *)data)[4], ((double *)data)[5]);
                 }
+                break;
+            case LOG_EVENT_TYPE_PVT:
+                // x, y, z, t_bias, lat, lon, alt
+                fprintf(logs[i].file, "%.15f,%.15f,%.15f,%.15f,%.15f,%.15f,%.15f\n", ((double *)data)[0], ((double *)data)[1], ((double *)data)[2], ((double *)data)[3], ((double *)data)[4], ((double *)data)[5], ((double *)data)[6]);
                 break;
             }
         }
