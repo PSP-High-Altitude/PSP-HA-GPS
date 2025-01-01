@@ -40,6 +40,12 @@ typedef struct
     uint8_t ca_l;
     uint8_t ca_en;
 
+    int64_t ip_hist[1000];
+    int64_t qp_hist[1000];
+    int64_t prompt_hist_len;
+
+    double cn0;
+
     uint8_t tracked_this_epoch;
     uint8_t wait_frames;
     int nav_ms;

@@ -5,6 +5,7 @@
 #include <math.h>
 #include "waves.h"
 #include "logging.h"
+#include "tools.h"
 
 extern uint64_t clock;
 
@@ -183,6 +184,7 @@ void init_channel(channel_t *chan, int chan_num, int sv, double lo_dop, double c
 
     chan->ie = 0, chan->qe = 0, chan->ip = 0, chan->qp = 0, chan->il = 0, chan->ql = 0;
     chan->ca_e = 0, chan->ca_p = 0, chan->ca_l = 0;
+    chan->prompt_hist_len = 0;
 
     chan->ca_freq_integrator = ((uint64_t)chan->ca_rate) << 32;
     chan->lo_freq_integrator = ((uint64_t)chan->lo_rate) << 32;
@@ -321,18 +323,6 @@ uint8_t process_message(channel_t *chan)
         if (!check_parity(chan->nav_buf + i * 30, p, p[4], p[5]))
         {
             chan->wait_frames = 2;
-            if(chan->sv == 3) {
-                printf("Parity fail: %d\n", i);
-                uint8_t subframe_id = (chan->nav_buf[29 + 20] << 2) | (chan->nav_buf[29 + 21] << 1) | chan->nav_buf[29 + 22];
-                printf("Subframe ID: %d\n", subframe_id);
-                if(i == 6) {
-                    for(int j = 0; j < 300; j++) {
-                        if((j > 0) && ((j % 30) == 0)) printf("\n");
-                        printf("%d", tmp_buf[j]);
-                    }
-                    printf("\n");
-                }
-            }
             return 0;
         }
     }
@@ -342,9 +332,6 @@ uint8_t process_message(channel_t *chan)
     if (subframe_id < 1 || subframe_id > 5)
     {
         chan->wait_frames = 2;
-        if(chan->sv == 3) {
-            printf("HOW invalid: %d\n", subframe_id);
-        }
         return 0;
     }
 
@@ -409,6 +396,22 @@ void clock_channel(channel_t *chan, uint8_t sample)
 
     if (is_ca_epoch(&chan->ca) && !chan->tracked_this_epoch)
     {
+        // Estimate CN0
+        if(chan->prompt_hist_len < 1000) {
+            chan->ip_hist[chan->prompt_hist_len] = chan->ip;
+            chan->qp_hist[chan->prompt_hist_len] = chan->qp;
+            chan->prompt_hist_len++;
+        } else {
+            memmove(chan->ip_hist, chan->ip_hist + 1, 999 * sizeof(int64_t));
+            memmove(chan->qp_hist, chan->qp_hist + 1, 999 * sizeof(int64_t));
+            chan->ip_hist[999] = chan->ip;
+            chan->qp_hist[999] = chan->qp;
+        }
+        chan->cn0 = cn0_svn_estimator(chan->ip_hist, chan->qp_hist, chan->prompt_hist_len, 0.001);    
+        if(!isnan(chan->cn0)) {
+            logging_log(LOG_EVENT_TYPE_POWER, (void *)&chan->cn0, chan->sv + 1, 0);    
+        }
+
         int64_t power_early = chan->ie * chan->ie + chan->qe * chan->qe;
         int64_t power_late = chan->il * chan->il + chan->ql * chan->ql;
         int64_t power_prompt = chan->ip * chan->ip + chan->qp * chan->qp;
@@ -467,6 +470,11 @@ void clock_channel(channel_t *chan, uint8_t sample)
             }
         }
 
+        // Report CN0 on the second
+        if(chan->total_ms % 1000 == 0) {
+            printf("GPS L1CA SV %d CN0=%.2f\n", chan->sv+1, chan->cn0);
+        }
+
         chan->ie = 0;
         chan->qe = 0;
         chan->ip = 0;
@@ -488,8 +496,6 @@ double get_tx_time(channel_t *chan)
                ((chan->nav_ms + 1) / 1000.0) +
                (chan->ca.chip / 1023000.0) +
                ((chan->ca_phase + (1U << 31)) * pow(2, -32) / 1023000.0);
-
-    printf("%d,%u,%u,%u,%lu,%.10f\n", chan->last_z_count, chan->nav_bit_count, chan->nav_ms, chan->ca.chip, chan->ca_phase, t);
 
     return t;
 }

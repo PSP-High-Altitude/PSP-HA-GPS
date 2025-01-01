@@ -132,20 +132,34 @@ def plot_filter(fname):
         f.close()
 
     fig, ax = plt.subplots()
-    ax1 = ax.twinx()
+    #ax1 = ax.twinx()
     ax2 = ax.twinx()
-    #ax.plot(code_err, label='code_err', color="red")
-    ax1.plot(code_int, label='code_int', color="green")
-    #ax2.plot(code_rate, label='code_rate', color="blue")
+    ax.plot(code_err, label='code_err', color="red")
+    #ax1.plot(code_int, label='code_int', color="green")
+    ax2.plot(code_rate, label='code_rate', color="blue")
     fig.legend(loc='upper right')
 
     fig, ax = plt.subplots()
-    ax1 = ax.twinx()
+    #ax1 = ax.twinx()
     ax2 = ax.twinx()
-    #ax.plot(carrier_err, label='carrier_err', color="red")
-    ax1.plot(carrier_int, label='carrier_int', color="green")
-    #ax2.plot(carrier_rate, label='carrier_rate', color="blue")
+    ax.plot(carrier_err, label='carrier_err', color="red")
+    #ax1.plot(carrier_int, label='carrier_int', color="green")
+    ax2.plot(carrier_rate, label='carrier_rate', color="blue")
     fig.legend(loc='upper right')
+
+    plt.show()
+
+def plot_power(fname):
+    cn0 = []
+
+    with open(fname, 'r') as f:
+        fdata = f.readlines()
+        for fline in fdata:
+            line_split = fline.split(',')
+            cn0.append(float(line_split[0]))
+        f.close()
+
+    plt.plot(cn0)
 
     plt.show()
 
@@ -159,3 +173,5 @@ if __name__ == '__main__':
         plot_time(sys.argv[2])
     elif(sys.argv[1] == 'filter'):
         plot_filter(sys.argv[2])
+    elif(sys.argv[1] == 'power'):
+        plot_power(sys.argv[2])

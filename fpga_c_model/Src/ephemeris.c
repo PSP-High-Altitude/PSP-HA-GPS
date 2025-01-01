@@ -181,7 +181,6 @@ double get_clock_correction(ephemeris_t *ephm, double t)
     double E_k = eccentric_anomaly(ephm, t_k);
     double t_R = F * e * root_A * sin(E_k);
     t = time_from_epoch(t, t_oc);
-    printf("clock correction: %g\n", a_f0 + a_f1 * t + a_f2 * (t * t) + t_R - T_GD);
 
     return a_f0 +
            a_f1 * t +

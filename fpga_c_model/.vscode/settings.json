@@ -5,6 +5,20 @@
         "gps.h": "c",
         "ephemeris.h": "c",
         "logging.h": "c",
-        "channel.h": "c"
+        "channel.h": "c",
+        "cstdlib": "c",
+        "cmath": "c",
+        "compare": "c",
+        "concepts": "c",
+        "cstddef": "c",
+        "cstdint": "c",
+        "cstring": "c",
+        "initializer_list": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "xtr1common": "c",
+        "xutility": "c",
+        "stdlib.h": "c",
+        "tools.h": "c"
     }
 }

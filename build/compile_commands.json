@@ -1,0 +1,8 @@
+[
+{
+  "directory": "C:/Users/griff/Documents/PSP-HA-GPS/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles/fft_correlator.dir/includes_CXX.rsp -g -o CMakeFiles\\fft_correlator.dir\\fft_correlator.cpp.obj -c C:\\Users\\griff\\Documents\\PSP-HA-GPS\\fft_correlator\\fft_correlator.cpp",
+  "file": "C:/Users/griff/Documents/PSP-HA-GPS/fft_correlator/fft_correlator.cpp",
+  "output": "CMakeFiles/fft_correlator.dir/fft_correlator.cpp.obj"
+}
+]

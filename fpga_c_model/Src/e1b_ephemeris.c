@@ -183,9 +183,7 @@ double e1b_get_clock_correction(e1b_ephemeris_t *ephm, double t)
     double A_1G = ephm->A_1G * pow(2, -51);
     double t_0G = ephm->t_0G * 3600.0;
     uint8_t WN_0G = ephm->WN_0G;
-    printf("A_0G: %g, A_1G: %g, t_0G: %g, WN_0G: %d, TOW: %d, WN: %d\n", A_0G, A_1G, t_0G, WN_0G, ephm->tow, ephm->wn);
     double dt_systems = A_0G + A_1G * (ephm->tow - t_0G + ((ephm->wn - WN_0G) % 64) * 604800);
-    printf("e1b_clock_correction: %g\n", a_f0 + a_f1 * t + a_f2 * (t * t) + t_R - BGD + dt_systems);
 
     return a_f0 +
            a_f1 * t +

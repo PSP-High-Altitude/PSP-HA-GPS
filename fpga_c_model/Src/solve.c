@@ -44,9 +44,7 @@ uint8_t solve(channel_t *chan, int num_chans, e1b_channel_t *e1b_chan, int num_e
         t_tx[i] = get_tx_time(&chan[i]);
         t_tx[i] -= get_clock_correction(&chan[i].ephm, t_tx[i]);
         get_satellite_ecef(&chan[i].ephm, t_tx[i], x_sat + i, y_sat + i, z_sat + i);
-        // printf("ecef: %g, %g, %g\n", x_sat[i], y_sat[i], z_sat[i]);
         t_pc += t_tx[i];
-        printf("t_tx[%d]: %.5f\n", i, t_tx[i]);
         weights[i] = 1;
     }
 
@@ -55,9 +53,7 @@ uint8_t solve(channel_t *chan, int num_chans, e1b_channel_t *e1b_chan, int num_e
         t_tx[i] = e1b_get_tx_time(&e1b_chan[i - num_chans]);
         t_tx[i] -= e1b_get_clock_correction(&e1b_chan[i - num_chans].ephm, t_tx[i]);
         e1b_get_satellite_ecef(&e1b_chan[i - num_chans].ephm, t_tx[i], x_sat + i, y_sat + i, z_sat + i);
-        // printf("ecef: %g, %g, %g\n", x_sat[i], y_sat[i], z_sat[i]);
         t_pc += t_tx[i];
-        printf("t_tx[%d]: %.5f\n", i, t_tx[i]);
         weights[i] = 1;
     }
 
@@ -165,13 +161,10 @@ uint8_t solve(channel_t *chan, int num_chans, e1b_channel_t *e1b_chan, int num_e
         double dt = md[3];
 
         double error = sqrt(dx * dx + dy * dy + dz * dz);
-        if (i + 1 == MAX_ITER)
-            printf("error: %.5f\n", error);
-
         if (error < 1.0) {
-            printf("error: %.5f\n", error);
             break;
         }
+
         *x += dx;
         *y += dy;
         *z += dz;

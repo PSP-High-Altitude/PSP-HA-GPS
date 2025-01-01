@@ -19,6 +19,7 @@ int count_channels_gps_l1ca = 0;
     logging_create_log(LOG_EVENT_TYPE_IQ, sv, 0); \
     logging_create_log(LOG_EVENT_TYPE_TIME, sv, 0); \
     logging_create_log(LOG_EVENT_TYPE_FILTER, sv, 0); \
+    logging_create_log(LOG_EVENT_TYPE_POWER, sv, 0); \
     count_channels_gps_l1ca++;
 
 e1b_channel_t channels_galileo_e1b[24];
@@ -28,6 +29,7 @@ int count_channels_galileo_e1b = 0;
     logging_create_log(LOG_EVENT_TYPE_IQ, sv, 1); \
     logging_create_log(LOG_EVENT_TYPE_TIME, sv, 1); \
     logging_create_log(LOG_EVENT_TYPE_FILTER, sv, 1); \
+    logging_create_log(LOG_EVENT_TYPE_POWER, sv, 1); \
     count_channels_galileo_e1b++;
 
 uint8_t file_buf;
@@ -57,12 +59,13 @@ int main()
 
     file = fopen("../gnss-20170427-L1.1bit.I.bin", "rb");
 
-    CREATE_GALILEO_E1B_CHANNEL(24, -246.0, 2837.5);
+    CREATE_GALILEO_E1B_CHANNEL(24, -285.0, 2837.5);
     //CREATE_GALILEO_E1B_CHANNEL(14, -3200.0, 3770.1);
-    CREATE_GPS_L1CA_CHANNEL(5, 1400.0, 969.4);
-    CREATE_GPS_L1CA_CHANNEL(2, 1600.0, 7.0);
-    CREATE_GPS_L1CA_CHANNEL(21, -2400.0, 817.4);
-    CREATE_GPS_L1CA_CHANNEL(26, -3400, 446.3);
+    //CREATE_GALILEO_E1B_CHANNEL(26, 1000.0, 1000.6);
+    //CREATE_GPS_L1CA_CHANNEL(5, 1400.0, 969.4);
+    //CREATE_GPS_L1CA_CHANNEL(2, 1600.0, 7.0);
+    //CREATE_GPS_L1CA_CHANNEL(21, -2400.0, 817.4);
+    //CREATE_GPS_L1CA_CHANNEL(26, -3400, 446.3);
 
     logging_create_log(LOG_EVENT_TYPE_PVT, 0, 0);
 
